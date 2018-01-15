@@ -1,19 +1,19 @@
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.scene.input.MouseEvent;
+import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.animation.Timeline;
-import javafx.animation.KeyFrame;
-import javafx.animation.Animation;
-import javafx.animation.FadeTransition;
+import javafx.scene.layout.Pane;
 import javafx.util.Duration;
-import java.util.Random;
 
 public class Controller implements Initializable {
   @FXML
@@ -23,11 +23,9 @@ public class Controller implements Initializable {
 
   private int score;
   private Timeline spawner;
-  private Random r;
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
-    r = new Random();
     setScore(0);
     spawner = new Timeline(new KeyFrame(
       Duration.seconds(2),
@@ -55,17 +53,26 @@ public class Controller implements Initializable {
       field.getChildren().remove(enemy);
     });
     enemy.relocate(
-      r.nextDouble()*(field.getWidth()-enemy.getBoundsInParent().getWidth()),
-      r.nextDouble()*(field.getHeight()-enemy.getBoundsInParent().getHeight())
+      Math.random()*(field.getWidth()-enemy.getBoundsInParent().getWidth()),
+      Math.random()*(field.getHeight()-enemy.getBoundsInParent().getHeight())
     );
     enemy.setOpacity(0.0);
     enemy.setSmooth(true);
 
-    FadeTransition f = new FadeTransition(Duration.millis(500), enemy);
-    f.setFromValue(0.0);
-    f.setToValue(1.0);
+    FadeTransition in = new FadeTransition(Duration.millis(500), enemy);
+    in.setFromValue(0.0);
+    in.setToValue(1.0);
 
+    FadeTransition out = new FadeTransition(Duration.seconds(1), enemy);
+    out.setFromValue(1.0);
+    out.setToValue(0.0);
+
+    SequentialTransition trans = new SequentialTransition(
+        in,
+        new PauseTransition(Duration.seconds(2)),
+        out
+    );
     field.getChildren().add(enemy);
-    f.play();
+    trans.play();
   }
 }
