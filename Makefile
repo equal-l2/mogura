@@ -11,4 +11,4 @@ run: all
 	java Main
 
 %.class : %.java
-	javac $^
+	javac $^ -Xdiags:verbose
