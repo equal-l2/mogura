@@ -58,6 +58,7 @@ public class Controller implements Initializable {
     );
 
     enemy.setOnMouseClicked( (MouseEvent) -> {
+      enemy.setMouseTransparent(true);
       addScore(10);
       Timeline tl = new Timeline(/*24.0*/);
       ImageView expl = new ImageView();
