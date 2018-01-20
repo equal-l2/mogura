@@ -1,5 +1,6 @@
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.stream.IntStream;
 import java.util.ResourceBundle;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
@@ -26,10 +27,18 @@ public class Controller implements Initializable {
 
   private int score;
   private Timeline spawner;
+  private Image[] expImages;
+  private AudioClip expSound;
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
     setScore(0);
+    expSound = new AudioClip(Paths.get("exp.wav").toUri().toString());
+    expImages = IntStream
+      .rangeClosed(1,108)
+      .mapToObj(i -> String.format("exp/%03d.png",i))
+      .map(Image::new)
+      .toArray(Image[]::new);
     spawner = new Timeline(new KeyFrame(
       Duration.seconds(2),
       ActionEvent -> spawnEnemy()
@@ -60,7 +69,7 @@ public class Controller implements Initializable {
     enemy.setOnMouseClicked( (MouseEvent) -> {
       enemy.setMouseTransparent(true);
       addScore(10);
-      Timeline tl = new Timeline(/*24.0*/);
+      Timeline tl = new Timeline();
       ImageView expl = new ImageView();
       expl.relocate(enemy.getLayoutX(),enemy.getLayoutY());
       expl.setFitWidth(enemy.getFitWidth());
@@ -71,20 +80,20 @@ public class Controller implements Initializable {
       });
 
       ObservableList<KeyFrame> kf = tl.getKeyFrames();
+      final int frameRate = 24;
       Duration frameTime = Duration.ZERO;
-      final Duration frameGap = Duration.millis(42);
-      for(int i = 1; i <= 108; ++i) {
-        final int n = i;
+      final Duration frameGap = Duration.millis(1000/frameRate);
+      for(final Image i : expImages) {
         kf.add(new KeyFrame(
               frameTime,
-              ActionEvent -> expl.setImage(new Image(String.format("exp/%03d.png",n)))
+              ActionEvent -> expl.setImage(i)
               ));
         frameTime = frameTime.add(frameGap);
       }
 
       field.getChildren().add(expl);
 
-      new AudioClip(Paths.get("exp.wav").toUri().toString()).play();
+      expSound.play();
       tl.play();
     });
     enemy.setOpacity(0.0);
