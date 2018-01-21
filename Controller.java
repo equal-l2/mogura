@@ -1,6 +1,4 @@
 import java.net.URL;
-import java.nio.file.Paths;
-import java.util.stream.IntStream;
 import java.util.ResourceBundle;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
@@ -8,7 +6,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -16,7 +13,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
 
 public class Controller implements Initializable {
@@ -27,18 +23,14 @@ public class Controller implements Initializable {
 
   private int score;
   private Timeline spawner;
-  private Image[] expImages;
-  private AudioClip expSound;
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
+    // Never used but needed to invoke static constructor
+    // and load images and the sound beforehand
+    Explosion e = new Explosion();
+
     setScore(0);
-    expSound = new AudioClip(Paths.get("exp.wav").toUri().toString());
-    expImages = IntStream
-      .rangeClosed(1,108)
-      .mapToObj(i -> String.format("exp/%03d.png",i))
-      .map(Image::new)
-      .toArray(Image[]::new);
     spawner = new Timeline(new KeyFrame(
       Duration.seconds(2),
       ActionEvent -> spawnEnemy()
@@ -69,32 +61,16 @@ public class Controller implements Initializable {
     enemy.setOnMouseClicked( (MouseEvent) -> {
       enemy.setMouseTransparent(true);
       addScore(10);
-      Timeline tl = new Timeline();
-      ImageView expl = new ImageView();
+      Explosion expl = new Explosion();
       expl.relocate(enemy.getLayoutX(),enemy.getLayoutY());
       expl.setFitWidth(enemy.getFitWidth());
       expl.setPreserveRatio(true);
-      tl.setOnFinished( (ActionEvent) -> {
+      expl.setOnFinished( (ActionEvent) -> {
         field.getChildren().remove(expl);
         field.getChildren().remove(enemy);
       });
-
-      ObservableList<KeyFrame> kf = tl.getKeyFrames();
-      final int frameRate = 24;
-      Duration frameTime = Duration.ZERO;
-      final Duration frameGap = Duration.millis(1000/frameRate);
-      for(final Image i : expImages) {
-        kf.add(new KeyFrame(
-              frameTime,
-              ActionEvent -> expl.setImage(i)
-              ));
-        frameTime = frameTime.add(frameGap);
-      }
-
       field.getChildren().add(expl);
-
-      expSound.play();
-      tl.play();
+      expl.play();
     });
     enemy.setOpacity(0.0);
     enemy.setSmooth(true);
