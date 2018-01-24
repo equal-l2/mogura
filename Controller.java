@@ -181,6 +181,11 @@ public class Controller implements Initializable {
         new PauseTransition(Duration.seconds(2)),
         out
     );
+
+    trans.setOnFinished( ActionEvent -> {
+      field.getChildren().remove(eView);
+    });
+
     field.getChildren().add(eView);
     trans.play();
   }
