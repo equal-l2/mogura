@@ -11,9 +11,10 @@ import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
 
 class Explosion extends ImageView {
-  final private Timeline tl;
   static final private Image[] expImages;
   static final private AudioClip expSound;
+  private final Timeline tl;
+  private double rate;
 
   static {
     expSound = new AudioClip(Paths.get("exp.wav").toUri().toString());
@@ -26,25 +27,32 @@ class Explosion extends ImageView {
 
   Explosion() {
     tl = new Timeline();
-    ObservableList<KeyFrame> kf = tl.getKeyFrames();
-    final int frameRate = 24;
-    Duration frameTime = Duration.ZERO;
-    final Duration frameGap = Duration.millis(1000/frameRate);
-    for(final Image i : expImages) {
-      kf.add(new KeyFrame(
-            frameTime,
-            ActionEvent -> setImage(i)
-            ));
-      frameTime = frameTime.add(frameGap);
-    }
+    rate = 1.0;
   }
 
   void play() {
+      expSound.setRate(rate);
+      ObservableList<KeyFrame> kf = tl.getKeyFrames();
+      kf.clear();
+      final double frameRate = 24*rate;
+      Duration frameTime = Duration.ZERO;
+      final Duration frameGap = Duration.millis(1000/frameRate);
+      for(final Image i : expImages) {
+        kf.add(new KeyFrame(
+              frameTime,
+              ActionEvent -> setImage(i)
+              ));
+        frameTime = frameTime.add(frameGap);
+      }
       expSound.play();
       tl.play();
   }
 
   void setOnFinished(EventHandler<ActionEvent> e) {
     tl.setOnFinished(e);
+  }
+
+  void setRate(double rate) {
+    this.rate = rate;
   }
 }
