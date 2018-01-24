@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.util.stream.Stream;
 import java.util.Objects;
 import java.util.ArrayList;
+import javafx.scene.media.AudioClip;
 
 public class Controller implements Initializable {
   @FXML
@@ -38,6 +39,30 @@ public class Controller implements Initializable {
     }
     final int score;
     final TYPE type;
+    final static Enemy[] enemies;
+
+    static {
+      ArrayList<Enemy> eList = new ArrayList<>();
+      try {
+        BufferedReader bfr = Files.newBufferedReader(Paths.get("enemies.conf"));
+        String line;
+        while ((line = bfr.readLine()) != null) {
+          line.trim();
+          if (line.charAt(0) == '#') continue;
+          final String[] ss = line.split(" ");
+          try {
+            eList.add(new Enemy(ss[0], ss[1]));
+          } catch (Exception e) {
+            System.err.println("Invalid conf line: "+line);
+          }
+        }
+        bfr.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
+      enemies = eList.toArray(new Enemy[eList.size()]);
+    }
 
     Enemy(String fileName, String effect) {
       super("pic/"+fileName);
@@ -58,15 +83,17 @@ public class Controller implements Initializable {
         type = TYPE.ENEMY;
       }
     }
-  }
 
-  Enemy[] enemies;
+    static Enemy getRandomEnemy() {
+      return enemies[(int)(enemies.length*Math.random())];
+    }
+  }
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
-    // Never used but needed to invoke static constructor
-    // and load images and the sound beforehand
-    Explosion e = new Explosion();
+    // Never used but needed to invoke static constructors
+    new Explosion();
+    Enemy.getRandomEnemy();
 
     setScore(0);
     spawner = new Timeline(new KeyFrame(
@@ -75,34 +102,6 @@ public class Controller implements Initializable {
     ));
     spawner.setCycleCount(Animation.INDEFINITE);
     spawner.play();
-    loadConf();
-  }
-
-  private void loadConf() {
-    try {
-      BufferedReader bfr = Files.newBufferedReader(Paths.get("enemies.conf"));
-      ArrayList<Enemy> eList = new ArrayList<>();
-      String line;
-      while ((line = bfr.readLine()) != null) {
-        line.trim();
-        if (line.charAt(0) == '#') continue;
-        final String[] ss = line.split(" ");
-        try {
-          eList.add(new Enemy(ss[0], ss[1]));
-        } catch (Exception e) {
-          System.err.println("Invalid conf line: "+line);
-        }
-      }
-      enemies = eList.toArray(new Enemy[eList.size()]);
-      bfr.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-  }
-
-  private Enemy getRandomEnemy() {
-    return enemies[(int)(enemies.length*Math.random())];
   }
 
   private void addScore(int i) {
@@ -115,38 +114,65 @@ public class Controller implements Initializable {
   }
 
   private void spawnEnemy() {
-    Enemy e = getRandomEnemy();
-    ImageView enemyView = new ImageView(e);
-    enemyView.setFitWidth(100);
-    enemyView.setPreserveRatio(true);
+    Enemy e = Enemy.getRandomEnemy();
+    ImageView eView = new ImageView(e);
+    eView.setFitWidth(100);
+    eView.setPreserveRatio(true);
 
-    enemyView.relocate(
-      Math.random()*(field.getWidth()-enemyView.getBoundsInParent().getWidth()),
-      Math.random()*(field.getHeight()-enemyView.getBoundsInParent().getHeight())
+    eView.relocate(
+      Math.random()*(field.getWidth()-eView.getBoundsInParent().getWidth()),
+      Math.random()*(field.getHeight()-eView.getBoundsInParent().getHeight())
     );
 
-    enemyView.setOnMouseClicked( (MouseEvent) -> {
-      enemyView.setMouseTransparent(true);
-      addScore(e.score);
-      Explosion expl = new Explosion();
-      expl.relocate(enemyView.getLayoutX(),enemyView.getLayoutY());
-      expl.setFitWidth(enemyView.getFitWidth());
-      expl.setPreserveRatio(true);
-      expl.setOnFinished( (ActionEvent) -> {
-        field.getChildren().remove(expl);
-        field.getChildren().remove(enemyView);
-      });
-      field.getChildren().add(expl);
-      expl.play();
+    eView.setOnMouseClicked( (MouseEvent) -> {
+      eView.setMouseTransparent(true);
+      switch (e.type) {
+        case ENEMY: {
+          addScore(e.score);
+          Explosion expl = new Explosion();
+          expl.relocate(eView.getLayoutX(),eView.getLayoutY());
+          expl.setFitWidth(eView.getFitWidth());
+          expl.setPreserveRatio(true);
+          expl.setOnFinished( (ActionEvent) -> {
+            field.getChildren().remove(expl);
+            field.getChildren().remove(eView);
+          });
+          field.getChildren().add(expl);
+          expl.play();
+          break;
+        }
+        case SPECIAL: {
+          addScore(e.score);
+          field.getChildren().remove(eView);
+          break;
+        }
+        case DONTTOUCH: {
+          addScore(-10*e.score);
+          ImageView cross = new ImageView(new Image("cross.png"));
+          cross.relocate(eView.getLayoutX(),eView.getLayoutY());
+          cross.setFitWidth(eView.getFitWidth());
+          cross.setPreserveRatio(true);
+          field.getChildren().add(cross);
+          AudioClip a = new AudioClip(Paths.get("bubbu.wav").toUri().toString());
+          PauseTransition t = new PauseTransition(Duration.millis(1690));
+          t.setOnFinished( (ActionEvent) -> {
+            field.getChildren().remove(eView);
+            field.getChildren().remove(cross);
+          });
+          a.play();
+          t.play();
+          break;
+        }
+      }
     });
-    enemyView.setOpacity(0.0);
-    enemyView.setSmooth(true);
+    eView.setOpacity(0.0);
+    eView.setSmooth(true);
 
-    FadeTransition in = new FadeTransition(Duration.millis(500), enemyView);
+    FadeTransition in = new FadeTransition(Duration.millis(500), eView);
     in.setFromValue(0.0);
     in.setToValue(1.0);
 
-    FadeTransition out = new FadeTransition(Duration.seconds(1), enemyView);
+    FadeTransition out = new FadeTransition(Duration.seconds(1), eView);
     out.setFromValue(1.0);
     out.setToValue(0.0);
 
@@ -155,7 +181,7 @@ public class Controller implements Initializable {
         new PauseTransition(Duration.seconds(2)),
         out
     );
-    field.getChildren().add(enemyView);
+    field.getChildren().add(eView);
     trans.play();
   }
 }
