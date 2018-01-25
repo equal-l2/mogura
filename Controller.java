@@ -22,21 +22,22 @@ import javafx.util.Duration;
 
 public class Controller implements Initializable {
   @FXML
-  private Label scoreLabel;
+  private Label scoreLabel; // スコア表示用ラベル
   @FXML
-  private Pane field;
+  private Pane field; // 敵表示用ペイン（「フィールド」）
 
   private int score;
-  private Timeline spawner;
-  private MediaPlayer specialMusic;
-  private boolean stateSpecial;
+  private Timeline spawner; // 敵表示用タイムライン
+  private MediaPlayer specialMusic; // スペシャル状態用音楽
+  private boolean stateSpecial; // スペシャル状態かを示すブーリアン
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
-    // Never used but needed to invoke static constructors
+    /* staticコンストラクタをあらかじめ呼ぶための処理 */
     new Explosion();
     Enemy.getRandomEnemy();
 
+    /* 各種初期化 */
     specialMusic = new MediaPlayer(new Media(Paths.get("special.wav").toUri().toString()));
     specialMusic.setCycleCount(3);
     specialMusic.setVolume(0.5);
@@ -48,148 +49,156 @@ public class Controller implements Initializable {
     spawner.play();
   }
 
-  private void enableSpecial() {
-    if (!stateSpecial) {
-          FilteredList<Node> iList = field.getChildren().filtered(node -> {
-            return node instanceof EnemyView;
-          });
-          for(Node n : iList) {
-            EnemyView eView = (EnemyView)n;
-            if (!eView.underDestruction) {
-              destroyEnemy(eView);
-            }
-          }
-          stateSpecial = true;
-          setSpawnTime(Duration.millis(400));
-          specialMusic.setOnEndOfMedia( () -> {
-            if (specialMusic.getCurrentCount() == specialMusic.getCycleCount()) {
-              specialMusic.stop();
-              setSpawnTimeToDefault();
-              stateSpecial = false;
-            }
-          });
-          specialMusic.play();
+  private void enableSpecial() { // スペシャル状態に入る
+    if (stateSpecial) { return; } // すでにスペシャル状態なら何もしない
+    stateSpecial = true;
+
+    /* フィールド上の敵を全爆破 */
+    FilteredList<Node> iList = field.getChildren().filtered(node -> {
+      return node instanceof EnemyView;
+    });
+    for(Node n : iList) {
+      EnemyView eView = (EnemyView)n;
+      if (!eView.isUnderDestruction()) {
+        destroyEnemy(eView);
+      }
     }
+
+    setSpawnTime(Duration.millis(400)); // スポーン間隔を早める
+
+    specialMusic.setOnEndOfMedia( () -> { // 音楽がループし終わったらスペシャル状態を抜ける
+      if (specialMusic.getCurrentCount() == specialMusic.getCycleCount()) {
+        specialMusic.stop();
+        setSpawnTimeToDefault();
+        stateSpecial = false;
+      }
+    });
+    specialMusic.play();
   }
 
-  private void setSpawnTime(Duration d) {
+  private void setSpawnTime(Duration d) { // スポーン間隔を変更する
     spawner.stop();
-    spawner.getKeyFrames().setAll(new KeyFrame(
-      d,
-      ActionEvent -> spawnEnemy()
-    ));
+    spawner.getKeyFrames().setAll(new KeyFrame(d, ActionEvent -> spawnEnemy()));
     spawner.play();
   }
 
-  private void setSpawnTimeToDefault() {
-    setSpawnTime(Duration.millis(1000));
+  private void setSpawnTimeToDefault() { // スポーン間隔をデフォルトに戻す
+    setSpawnTime(Duration.millis(1000)); // デフォルトのスポーン間隔をいじるときはここ
   }
 
-  private void addScore(int i) {
+  private void addScore(int i) { // スコア加算
     setScore(score+i);
   }
 
-  private void setScore(int i) {
+  private void setScore(int i) { // スコア設定　基本的に直接呼んではいけない
     score = i;
     scoreLabel.setText(String.format("Score: %d",score));
   }
 
-  private void destroyEnemy(EnemyView e) {
-        Explosion expl = new Explosion();
-        destroyCommons(e, expl);
-        addScore(e.enemy.score);
-        expl.setOnFinished( ActionEvent -> {
-          field.getChildren().remove(expl);
-          field.getChildren().remove(e);
-        });
-        field.getChildren().add(expl);
-        expl.play();
+  private void destroyEnemy(EnemyView e) { // 敵破壊時の処理
+    Explosion expl = new Explosion();
+    destroyCommons(e, expl, e.enemy.score);
+    expl.setOnFinished( ActionEvent -> {
+      field.getChildren().remove(expl);
+      field.getChildren().remove(e);
+    });
+    expl.play();
   }
 
-  private void destroySpecial(EnemyView e) {
-        Explosion expl = new Explosion();
-        destroyCommons(e, expl);
-        addScore(e.enemy.score);
-        expl.setOnFinished( ActionEvent -> {
-          field.getChildren().remove(expl);
-          field.getChildren().remove(e);
-        });
-        expl.setRate(2.0);
-        field.getChildren().add(expl);
-        expl.play();
-        enableSpecial();
+  private void destroySpecial(EnemyView e) { // スペシャル敵破壊時の処理
+    Explosion expl = new Explosion();
+    expl.setRate(2.0);
+    destroyCommons(e, expl, e.enemy.score);
+    expl.setOnFinished( ActionEvent -> {
+      field.getChildren().remove(expl);
+      field.getChildren().remove(e);
+    });
+    expl.play();
+    enableSpecial();
   }
 
-  private void destroyDonttouch(EnemyView e) {
-        ImageView cross = new ImageView(new Image("cross.png"));
-        destroyCommons(e, cross);
-        addScore(-10*e.enemy.score);
-        field.getChildren().add(cross);
-        AudioClip a = new AudioClip(Paths.get("bubbu.wav").toUri().toString());
-        PauseTransition t = new PauseTransition(Duration.millis(1690));
-        t.setOnFinished( ActionEvent -> {
-          field.getChildren().remove(e);
-          field.getChildren().remove(cross);
-        });
-        a.play();
-        t.play();
+  private void destroyDonttouch(EnemyView e) { // 触ってはいけない敵破壊時の処理
+    ImageView cross = new ImageView(new Image("cross.png"));
+    destroyCommons(e, cross,-10*e.enemy.score);
+    AudioClip a = new AudioClip(Paths.get("bubbu.wav").toUri().toString());
+    PauseTransition t = new PauseTransition(Duration.millis(1690));
+    t.setOnFinished( ActionEvent -> {
+      field.getChildren().remove(e);
+      field.getChildren().remove(cross);
+    });
+    a.play();
+    t.play();
   }
 
-  private void destroyCommons(EnemyView enemy, ImageView effect) {
-        enemy.underDestruction = true;
-        enemy.setMouseTransparent(true);
-        effect.relocate(enemy.getLayoutX(),enemy.getLayoutY());
-        effect.setFitWidth(enemy.getFitWidth());
-        effect.setPreserveRatio(true);
+  private void destroyCommons(EnemyView enemy, ImageView effect, int scoreDelta) { // 敵破壊時の共通処理
+    addScore(scoreDelta);
+
+    /* 敵の処理 */
+    enemy.detonate(); // 敵に破壊を通知
+    enemy.setMouseTransparent(true); // 敵がマウスに反応しないようにする
+
+    /* エフェクトの処理 */
+    effect.relocate(enemy.getLayoutX(),enemy.getLayoutY()); // エフェクトの位置を敵に合わせる
+    effect.setFitWidth(enemy.getFitWidth()); // エフェクトの大きさを敵に合わせる
+    effect.setPreserveRatio(true); // アスペクト比を維持
+
+    field.getChildren().add(effect); // フィールドにエフェクトを表示
   }
 
-  private void spawnEnemy() {
+  private void spawnEnemy() { // 敵をスポーンする
     Enemy e = Enemy.getRandomEnemy();
-    EnemyView eView = new EnemyView(e);
-    eView.setFitWidth(100);
-    eView.setPreserveRatio(true);
 
+    EnemyView eView = new EnemyView(e);
+    eView.setFitWidth(100); // 敵の幅設定
+    eView.setPreserveRatio(true);
+    eView.setSmooth(true);
+
+    // 敵をランダムな位置へ移動
     eView.relocate(
       Math.random()*(field.getWidth()-eView.getBoundsInParent().getWidth()),
       Math.random()*(field.getHeight()-eView.getBoundsInParent().getHeight())
     );
 
+    // 敵の種類によって適切な処理を指定
     if (stateSpecial) {
       eView.setOnMouseEntered( MouseEvent -> destroyEnemy(eView) );
     } else {
-        switch (e.type) {
-          case ENEMY: {
-            eView.setOnMouseClicked(MouseEvent -> destroyEnemy(eView));
-            break;
-          }
-          case SPECIAL: {
-            eView.setOnMouseClicked(MouseEvent -> destroySpecial(eView));
-            break;
-          }
-          case DONTTOUCH: {
-            eView.setOnMouseClicked(MouseEvent -> destroyDonttouch(eView));
-            break;
-          }
+      switch (e.type) {
+        case ENEMY: {
+          eView.setOnMouseClicked(MouseEvent -> destroyEnemy(eView));
+          break;
+        }
+        case SPECIAL: {
+          eView.setOnMouseClicked(MouseEvent -> destroySpecial(eView));
+          break;
+        }
+        case DONTTOUCH: {
+          eView.setOnMouseClicked(MouseEvent -> destroyDonttouch(eView));
+          break;
+        }
       };
     }
-    eView.setOpacity(0.0);
-    eView.setSmooth(true);
 
+    eView.setOpacity(0.0); // フェードインに備えて透明にしておく
+
+    // 敵のフェードイン
     FadeTransition in = new FadeTransition(Duration.millis(500), eView);
     in.setFromValue(0.0);
     in.setToValue(1.0);
 
+    // 敵のフェードアウト
     FadeTransition out = new FadeTransition(Duration.seconds(1), eView);
     out.setFromValue(1.0);
     out.setToValue(0.0);
 
     SequentialTransition trans = new SequentialTransition(
-        in,
-        new PauseTransition(Duration.seconds(2)),
-        out
+      in,
+      new PauseTransition(Duration.seconds(2)), // 敵の表示時間
+      out
     );
 
     trans.setOnFinished( ActionEvent -> {
+      // フェードアウトしたらフィールドから削除する
       field.getChildren().remove(eView);
     });
 
