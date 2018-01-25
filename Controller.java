@@ -1,4 +1,5 @@
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
@@ -6,25 +7,18 @@ import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.util.Duration;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.io.BufferedReader;
-import java.util.stream.Stream;
-import java.util.Objects;
-import java.util.ArrayList;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.collections.transformation.FilteredList;
-import javafx.scene.Node;
+import javafx.util.Duration;
 
 public class Controller implements Initializable {
   @FXML
@@ -36,74 +30,6 @@ public class Controller implements Initializable {
   private Timeline spawner;
   private MediaPlayer specialMusic;
   private boolean stateSpecial;
-
-  static class Enemy extends Image {
-    enum TYPE {
-      ENEMY,
-      SPECIAL,
-      DONTTOUCH
-    }
-    final int score;
-    final TYPE type;
-    final static Enemy[] enemies;
-
-    static {
-      ArrayList<Enemy> eList = new ArrayList<>();
-      try {
-        BufferedReader bfr = Files.newBufferedReader(Paths.get("enemies.conf"));
-        String line;
-        while ((line = bfr.readLine()) != null) {
-          line.trim();
-          if (line.charAt(0) == '#') continue;
-          final String[] ss = line.split(" ");
-          try {
-            eList.add(new Enemy(ss[0], ss[1]));
-          } catch (Exception e) {
-            System.err.println("Invalid conf line: "+line);
-          }
-        }
-        bfr.close();
-      } catch (Exception e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-      enemies = eList.toArray(new Enemy[eList.size()]);
-    }
-
-    Enemy(String fileName, String effect) {
-      super("pic/"+fileName);
-      final String[] ss = effect.split(":");
-      score = Integer.parseInt(ss[0]);
-      if (ss.length > 1) {
-        switch (ss[1]) {
-          case "special":
-            type = TYPE.SPECIAL;
-            break;
-          case "donttouch":
-            type = TYPE.DONTTOUCH;
-            break;
-          default:
-            type = TYPE.ENEMY;
-        }
-      } else {
-        type = TYPE.ENEMY;
-      }
-    }
-
-    static Enemy getRandomEnemy() {
-      return enemies[(int)(enemies.length*Math.random())];
-    }
-  }
-
-  class EnemyView extends ImageView {
-    boolean underDestruction;
-    Enemy enemy;
-    EnemyView(Enemy e) {
-      super(e);
-      this.enemy = e;
-      underDestruction = false;
-    }
-  }
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
@@ -118,30 +44,19 @@ public class Controller implements Initializable {
     setScore(0);
     spawner = new Timeline();
     spawner.setCycleCount(Animation.INDEFINITE);
-    setSpawnTime(Duration.millis(1500));
+    setSpawnTimeToDefault();
     spawner.play();
   }
 
   private void enableSpecial() {
     if (!stateSpecial) {
-          FilteredList<Node> iList = field.getChildren().filtered( node -> {
+          FilteredList<Node> iList = field.getChildren().filtered(node -> {
             return node instanceof EnemyView;
           });
           for(Node n : iList) {
             EnemyView eView = (EnemyView)n;
             if (!eView.underDestruction) {
-              eView.setMouseTransparent(true);
-              addScore(eView.enemy.score);
-              Explosion expl = new Explosion();
-              expl.relocate(eView.getLayoutX(),eView.getLayoutY());
-              expl.setFitWidth(eView.getFitWidth());
-              expl.setPreserveRatio(true);
-              expl.setOnFinished( ActionEvent -> {
-                field.getChildren().remove(expl);
-                field.getChildren().remove(eView);
-              });
-              field.getChildren().add(expl);
-              expl.play();
+              destroyEnemy(eView);
             }
           }
           stateSpecial = true;
@@ -149,7 +64,7 @@ public class Controller implements Initializable {
           specialMusic.setOnEndOfMedia( () -> {
             if (specialMusic.getCurrentCount() == specialMusic.getCycleCount()) {
               specialMusic.stop();
-              setSpawnTime(Duration.millis(1500));
+              setSpawnTimeToDefault();
               stateSpecial = false;
             }
           });
@@ -166,6 +81,10 @@ public class Controller implements Initializable {
     spawner.play();
   }
 
+  private void setSpawnTimeToDefault() {
+    setSpawnTime(Duration.millis(1000));
+  }
+
   private void addScore(int i) {
     setScore(score+i);
   }
@@ -173,6 +92,55 @@ public class Controller implements Initializable {
   private void setScore(int i) {
     score = i;
     scoreLabel.setText(String.format("Score: %d",score));
+  }
+
+  private void destroyEnemy(EnemyView e) {
+        Explosion expl = new Explosion();
+        destroyCommons(e, expl);
+        addScore(e.enemy.score);
+        expl.setOnFinished( ActionEvent -> {
+          field.getChildren().remove(expl);
+          field.getChildren().remove(e);
+        });
+        field.getChildren().add(expl);
+        expl.play();
+  }
+
+  private void destroySpecial(EnemyView e) {
+        Explosion expl = new Explosion();
+        destroyCommons(e, expl);
+        addScore(e.enemy.score);
+        expl.setOnFinished( ActionEvent -> {
+          field.getChildren().remove(expl);
+          field.getChildren().remove(e);
+        });
+        expl.setRate(2.0);
+        field.getChildren().add(expl);
+        expl.play();
+        enableSpecial();
+  }
+
+  private void destroyDonttouch(EnemyView e) {
+        ImageView cross = new ImageView(new Image("cross.png"));
+        destroyCommons(e, cross);
+        addScore(-10*e.enemy.score);
+        field.getChildren().add(cross);
+        AudioClip a = new AudioClip(Paths.get("bubbu.wav").toUri().toString());
+        PauseTransition t = new PauseTransition(Duration.millis(1690));
+        t.setOnFinished( ActionEvent -> {
+          field.getChildren().remove(e);
+          field.getChildren().remove(cross);
+        });
+        a.play();
+        t.play();
+  }
+
+  private void destroyCommons(EnemyView enemy, ImageView effect) {
+        enemy.underDestruction = true;
+        enemy.setMouseTransparent(true);
+        effect.relocate(enemy.getLayoutX(),enemy.getLayoutY());
+        effect.setFitWidth(enemy.getFitWidth());
+        effect.setPreserveRatio(true);
   }
 
   private void spawnEnemy() {
@@ -187,75 +155,22 @@ public class Controller implements Initializable {
     );
 
     if (stateSpecial) {
-      eView.setOnMouseEntered( MouseEvent -> {
-        eView.underDestruction = true;
-        eView.setMouseTransparent(true);
-        addScore(e.score);
-        Explosion expl = new Explosion();
-        expl.relocate(eView.getLayoutX(),eView.getLayoutY());
-        expl.setFitWidth(eView.getFitWidth());
-        expl.setPreserveRatio(true);
-        expl.setOnFinished( ActionEvent -> {
-          field.getChildren().remove(expl);
-          field.getChildren().remove(eView);
-        });
-        field.getChildren().add(expl);
-        expl.play();
-      });
+      eView.setOnMouseEntered( MouseEvent -> destroyEnemy(eView) );
     } else {
-      eView.setOnMouseClicked( MouseEvent -> {
-        eView.setMouseTransparent(true);
-        eView.underDestruction = true;
         switch (e.type) {
           case ENEMY: {
-            addScore(e.score);
-            Explosion expl = new Explosion();
-            expl.relocate(eView.getLayoutX(),eView.getLayoutY());
-            expl.setFitWidth(eView.getFitWidth());
-            expl.setPreserveRatio(true);
-            expl.setOnFinished( ActionEvent -> {
-              field.getChildren().remove(expl);
-              field.getChildren().remove(eView);
-            });
-            field.getChildren().add(expl);
-            expl.play();
+            eView.setOnMouseClicked(MouseEvent -> destroyEnemy(eView));
             break;
           }
           case SPECIAL: {
-            addScore(e.score);
-            Explosion expl = new Explosion();
-            expl.relocate(eView.getLayoutX(),eView.getLayoutY());
-            expl.setFitWidth(eView.getFitWidth());
-            expl.setPreserveRatio(true);
-            expl.setOnFinished( ActionEvent -> {
-              field.getChildren().remove(expl);
-              field.getChildren().remove(eView);
-            });
-            expl.setRate(2.0);
-            field.getChildren().add(expl);
-            expl.play();
-            enableSpecial();
+            eView.setOnMouseClicked(MouseEvent -> destroySpecial(eView));
             break;
           }
           case DONTTOUCH: {
-            addScore(-10*e.score);
-            ImageView cross = new ImageView(new Image("cross.png"));
-            cross.relocate(eView.getLayoutX(),eView.getLayoutY());
-            cross.setFitWidth(eView.getFitWidth());
-            cross.setPreserveRatio(true);
-            field.getChildren().add(cross);
-            AudioClip a = new AudioClip(Paths.get("bubbu.wav").toUri().toString());
-            PauseTransition t = new PauseTransition(Duration.millis(1690));
-            t.setOnFinished( ActionEvent -> {
-              field.getChildren().remove(eView);
-              field.getChildren().remove(cross);
-            });
-            a.play();
-            t.play();
+            eView.setOnMouseClicked(MouseEvent -> destroyDonttouch(eView));
             break;
           }
-        }
-      });
+      };
     }
     eView.setOpacity(0.0);
     eView.setSmooth(true);

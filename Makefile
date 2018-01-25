@@ -5,7 +5,7 @@ SRCS = $(wildcard *.java)
 all: $(SRCS:.java=.class)
 
 clean:
-	rm *.class
+	rm -f *.class
 
 run: all
 	java Main
