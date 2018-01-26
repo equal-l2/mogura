@@ -4,6 +4,8 @@ import java.util.ResourceBundle;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.ParallelTransition;
+import javafx.animation.PathTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
@@ -18,6 +20,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public class Controller implements Initializable {
@@ -39,7 +46,7 @@ public class Controller implements Initializable {
 
     /* 各種初期化 */
     specialMusic = new MediaPlayer(new Media(Paths.get("special.wav").toUri().toString()));
-    specialMusic.setCycleCount(3);
+    specialMusic.setCycleCount(2);
     specialMusic.setVolume(0.5);
     stateSpecial = false;
     setScore(0);
@@ -142,7 +149,32 @@ public class Controller implements Initializable {
     effect.setFitWidth(enemy.getFitWidth()); // エフェクトの大きさを敵に合わせる
     effect.setPreserveRatio(true); // アスペクト比を維持
 
+    /* 点数表示の処理 */
+    Text t = new Text(Integer.toString(scoreDelta));
+    t.setFont(Font.font(40));
+    t.relocate(enemy.getLayoutX(),enemy.getLayoutY()); // 点数の位置を敵に合わせる
+
+    PathTransition move = new PathTransition( // 点数は表示後上に移動していく
+      Duration.millis(1000),
+      new Path(new MoveTo(0.0,0.0), new LineTo(0.0,-50.0)),
+      t
+    );
+
+    // 点数のフェードアウト
+    FadeTransition out = new FadeTransition(Duration.millis(500), t);
+    out.setFromValue(1.0);
+    out.setToValue(0.0);
+
+    SequentialTransition trans = new SequentialTransition(
+      new PauseTransition(Duration.millis(1200)), // 敵の表示時間
+      out
+    );
+
+    ParallelTransition p = new ParallelTransition(trans, move);
+
     field.getChildren().add(effect); // フィールドにエフェクトを表示
+    field.getChildren().add(t); // フィールドに点数を表示
+    p.play();
   }
 
   private void spawnEnemy() { // 敵をスポーンする
