@@ -1,5 +1,6 @@
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.ResourceBundle;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
@@ -37,6 +38,7 @@ public class Controller implements Initializable {
   private Timeline spawner; // 敵表示用タイムライン
   private MediaPlayer specialMusic; // スペシャル状態用音楽
   private boolean stateSpecial; // スペシャル状態かを示すブーリアン
+  private LinkedList<Enemy> enemyHistory; // 過去にスポーンした敵を記録するキュー
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
@@ -45,6 +47,7 @@ public class Controller implements Initializable {
     Enemy.getRandomEnemy();
 
     /* 各種初期化 */
+    enemyHistory = new LinkedList<Enemy>();
     specialMusic = new MediaPlayer(new Media(Paths.get("special.wav").toUri().toString()));
     specialMusic.setCycleCount(2);
     specialMusic.setVolume(0.5);
@@ -178,8 +181,19 @@ public class Controller implements Initializable {
   }
 
   private void spawnEnemy() { // 敵をスポーンする
-    Enemy e = Enemy.getRandomEnemy();
+    /* 過去5回でスポーンさせた敵はスポーンさせない */
+    Enemy e;
+    do {
+      e = Enemy.getRandomEnemy();
+      System.out.println(enemyHistory.contains(e));
+    } while (enemyHistory.contains(e));
 
+    if (enemyHistory.size() >= 5) {
+      enemyHistory.remove();
+    }
+    enemyHistory.add(e);
+
+    /* 敵の表示を設定 */
     EnemyView eView = new EnemyView(e);
     eView.setFitWidth(100); // 敵の幅設定
     eView.setPreserveRatio(true);
