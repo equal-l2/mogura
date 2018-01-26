@@ -22,7 +22,14 @@ class Enemy extends Image {
       String line;
       while ((line = bfr.readLine()) != null) {
         line.trim(); // 行頭の空白を取り除く
-        if (line.charAt(0) == '#') continue; // コメント行は無視
+
+        /* コメント削除 */
+        final int comment = line.indexOf('#');
+        if(comment != -1) {
+          line = line.substring(0,comment);
+          line.trim();
+        }
+
         final String[] ss = line.split(" "); // スペースで区切って配列へ
         try {
           eList.add(new Enemy(ss[0], ss[1])); // 得られた設定から敵を生成
