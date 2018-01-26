@@ -16,4 +16,16 @@ class EnemyView extends ImageView { // 敵表示用クラス
   boolean isUnderDestruction() {
     return underDestruction;
   }
+
+  double getRealWidth() {
+    return getBoundsInParent().getWidth();
+  }
+
+  double getRealHeight() {
+    return getBoundsInParent().getHeight();
+  }
+
+  boolean collideWith(EnemyView e) {
+    return e.getBoundsInParent().intersects(getBoundsInParent());
+  }
 }

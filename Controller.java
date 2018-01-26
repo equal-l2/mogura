@@ -1,5 +1,6 @@
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.ResourceBundle;
 import javafx.animation.Animation;
@@ -40,6 +41,9 @@ public class Controller implements Initializable {
   private boolean stateSpecial; // スペシャル状態かを示すブーリアン
   private LinkedList<Enemy> enemyHistory; // 過去にスポーンした敵を記録するキュー
 
+  private final Duration defaultSpawnRate = Duration.millis(1000);
+  private final Duration specialSpawnRate = Duration.millis(500);
+
   @Override
   public void initialize(URL url, ResourceBundle rb) {
     /* staticコンストラクタをあらかじめ呼ぶための処理 */
@@ -59,22 +63,29 @@ public class Controller implements Initializable {
     spawner.play();
   }
 
+  private EnemyView[] getEnemyViewsOnField() {
+    return field.getChildren()
+      .filtered(node -> {
+        return node instanceof EnemyView;
+      })
+      .stream()
+      .map(e -> (EnemyView)e)
+      .toArray(EnemyView[]::new);
+  }
+
   private void enableSpecial() { // スペシャル状態に入る
     if (stateSpecial) { return; } // すでにスペシャル状態なら何もしない
     stateSpecial = true;
 
     /* フィールド上の敵を全爆破 */
-    FilteredList<Node> iList = field.getChildren().filtered(node -> {
-      return node instanceof EnemyView;
-    });
-    for(Node n : iList) {
-      EnemyView eView = (EnemyView)n;
-      if (!eView.isUnderDestruction()) {
-        destroyEnemy(eView);
+    EnemyView[] eList = getEnemyViewsOnField();
+    for(EnemyView e : eList) {
+      if (!e.isUnderDestruction()) {
+        destroyEnemy(e);
       }
     }
 
-    setSpawnTime(Duration.millis(400)); // スポーン間隔を早める
+    setSpawnTime(specialSpawnRate); // スポーン間隔を早める
 
     specialMusic.setOnEndOfMedia(() -> { // 音楽がループし終わったらスペシャル状態を抜ける
       if (specialMusic.getCurrentCount() == specialMusic.getCycleCount()) {
@@ -93,7 +104,7 @@ public class Controller implements Initializable {
   }
 
   private void setSpawnTimeToDefault() { // スポーン間隔をデフォルトに戻す
-    setSpawnTime(Duration.millis(1000)); // デフォルトのスポーン間隔をいじるときはここ
+    setSpawnTime(defaultSpawnRate); // デフォルトのスポーン間隔をいじるときはここ
   }
 
   private void addScore(int i) { // スコア加算
@@ -185,7 +196,6 @@ public class Controller implements Initializable {
     Enemy e;
     do {
       e = Enemy.getRandomEnemy();
-      System.out.println(enemyHistory.contains(e));
     } while (enemyHistory.contains(e));
 
     if (enemyHistory.size() >= 5) {
@@ -200,11 +210,23 @@ public class Controller implements Initializable {
     eView.setSmooth(true);
 
     // 敵をランダムな位置へ移動
-    eView.relocate(
-      Math.random()*(field.getWidth()-eView.getBoundsInParent().getWidth()),
-      Math.random()*(field.getHeight()-eView.getBoundsInParent().getHeight())
-    );
-
+    // フィールド上の敵と位置が被ったら配置し直す
+    // フィールドが埋まっていて適切な位置が見つからなければあきらめる
+    {
+      int i = 0;
+      do {
+        eView.relocate(
+          Math.random()*(field.getWidth()-eView.getRealWidth()),
+          Math.random()*(field.getHeight()-eView.getRealHeight())
+        );
+        i++;
+      } while (
+        i < 100 &&
+        Arrays.stream(getEnemyViewsOnField())
+        .anyMatch(eOnField -> eOnField.collideWith(eView))
+      );
+      System.out.println(i);
+    }
     // 敵の種類によって適切な処理を指定
     if (stateSpecial) {
       eView.setOnMouseEntered(MouseEvent -> destroyEnemy(eView) );
