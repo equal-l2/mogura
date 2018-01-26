@@ -49,8 +49,8 @@ public class Controller implements Initializable {
     /* 各種初期化 */
     enemyHistory = new LinkedList<Enemy>();
     specialMusic = new MediaPlayer(new Media(Paths.get("special.wav").toUri().toString()));
-    specialMusic.setCycleCount(2);
-    specialMusic.setVolume(0.5);
+    specialMusic.setCycleCount(1);
+    specialMusic.setVolume(0.2);
     stateSpecial = false;
     setScore(0);
     spawner = new Timeline();
@@ -76,7 +76,7 @@ public class Controller implements Initializable {
 
     setSpawnTime(Duration.millis(400)); // スポーン間隔を早める
 
-    specialMusic.setOnEndOfMedia( () -> { // 音楽がループし終わったらスペシャル状態を抜ける
+    specialMusic.setOnEndOfMedia(() -> { // 音楽がループし終わったらスペシャル状態を抜ける
       if (specialMusic.getCurrentCount() == specialMusic.getCycleCount()) {
         specialMusic.stop();
         setSpawnTimeToDefault();
@@ -108,7 +108,7 @@ public class Controller implements Initializable {
   private void destroyEnemy(EnemyView e) { // 敵破壊時の処理
     Explosion expl = new Explosion();
     destroyCommons(e, expl, e.enemy.score);
-    expl.setOnFinished( ActionEvent -> {
+    expl.setOnFinished(ActionEvent -> {
       field.getChildren().remove(expl);
       field.getChildren().remove(e);
     });
@@ -119,7 +119,7 @@ public class Controller implements Initializable {
     Explosion expl = new Explosion();
     expl.setRate(2.0);
     destroyCommons(e, expl, e.enemy.score);
-    expl.setOnFinished( ActionEvent -> {
+    expl.setOnFinished(ActionEvent -> {
       field.getChildren().remove(expl);
       field.getChildren().remove(e);
     });
@@ -131,8 +131,8 @@ public class Controller implements Initializable {
     ImageView cross = new ImageView(new Image("cross.png"));
     destroyCommons(e, cross,-10*e.enemy.score);
     AudioClip a = new AudioClip(Paths.get("bubbu.wav").toUri().toString());
-    PauseTransition t = new PauseTransition(Duration.millis(1690));
-    t.setOnFinished( ActionEvent -> {
+    PauseTransition t = new PauseTransition(Duration.millis(1680));
+    t.setOnFinished(ActionEvent -> {
       field.getChildren().remove(e);
       field.getChildren().remove(cross);
     });
@@ -207,7 +207,7 @@ public class Controller implements Initializable {
 
     // 敵の種類によって適切な処理を指定
     if (stateSpecial) {
-      eView.setOnMouseEntered( MouseEvent -> destroyEnemy(eView) );
+      eView.setOnMouseEntered(MouseEvent -> destroyEnemy(eView) );
     } else {
       switch (e.type) {
         case ENEMY: {
@@ -243,7 +243,7 @@ public class Controller implements Initializable {
       out
     );
 
-    trans.setOnFinished( ActionEvent -> {
+    trans.setOnFinished(ActionEvent -> {
       // フェードアウトしたらフィールドから削除する
       field.getChildren().remove(eView);
     });
