@@ -22,6 +22,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
@@ -165,6 +166,7 @@ public class Controller implements Initializable {
 
     /* 点数表示の処理 */
     Text t = new Text(Integer.toString(scoreDelta));
+    if (scoreDelta < 0) t.setFill(Color.RED);
     t.setFont(Font.font(40));
     t.relocate(enemy.getLayoutX(),enemy.getLayoutY()); // 点数の位置を敵に合わせる
 
@@ -225,7 +227,6 @@ public class Controller implements Initializable {
         Arrays.stream(getEnemyViewsOnField())
         .anyMatch(eOnField -> eOnField.collideWith(eView))
       );
-      System.out.println(i);
     }
     // 敵の種類によって適切な処理を指定
     if (stateSpecial) {
