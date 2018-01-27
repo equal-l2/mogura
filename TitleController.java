@@ -35,11 +35,11 @@ public class TitleController implements Initializable {
 
   @FXML
   void onStartButtonAction(ActionEvent e) {
-    FXMLChanger.changeTo(e,"fxml/Main.fxml");
+    FXMLChanger.changeTo("fxml/Main.fxml");
   }
 
   @FXML
   void onHowToPlayButtonAction(ActionEvent e) {
-    FXMLChanger.changeTo(e,"fxml/HowToPlay.fxml");
+    FXMLChanger.changeTo("fxml/HowToPlay.fxml");
   }
 }

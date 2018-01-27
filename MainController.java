@@ -33,12 +33,15 @@ public class MainController implements Initializable {
   private Label scoreLabel; // スコア表示用ラベル
   @FXML
   private Pane field; // 敵表示用ペイン（「フィールド」）
+  @FXML
+  private Label timer;
 
   private int score;
   private Timeline spawner; // 敵表示用タイムライン
   private MediaPlayer specialMusic; // スペシャル状態用音楽
   private boolean stateSpecial; // スペシャル状態かを示すブーリアン
   private LinkedList<Enemy> enemyHistory; // 過去にスポーンした敵を記録するキュー
+  private int seconds;
 
   private final Duration defaultSpawnRate = Duration.millis(1000);
   private final Duration specialSpawnRate = Duration.millis(500);
@@ -49,17 +52,42 @@ public class MainController implements Initializable {
     new Explosion();
     Enemy.getRandomEnemy();
 
-    /* 各種初期化 */
+    /* 各種変数初期化 */
     enemyHistory = new LinkedList<Enemy>();
     specialMusic = new MediaPlayer(new Media(Paths.get("special.wav").toUri().toString()));
     specialMusic.setCycleCount(1);
     specialMusic.setVolume(0.2);
     stateSpecial = false;
     setScore(0);
+
+    /* タイマー初期化 */
+    Timeline t = new Timeline();
+    t.getKeyFrames().add(new KeyFrame(Duration.seconds(1), (ActionEvent) -> {
+      if(seconds <= 0) {
+        FXMLChanger.changeTo("fxml/Result.fxml");
+        t.stop();
+      } else {
+        --seconds;
+        UpdateTimer();
+      }
+    }));
+    setTimer(Duration.minutes(1));
+    t.setCycleCount(Animation.INDEFINITE);
+    t.play();
+
     spawner = new Timeline();
     spawner.setCycleCount(Animation.INDEFINITE);
     setSpawnTimeToDefault();
     spawner.play();
+  }
+
+  private void UpdateTimer() {
+    timer.setText(String.format("%02d:%02d", seconds/60, seconds%60));
+  }
+
+  private void setTimer(Duration d) {
+    seconds = (int) d.toSeconds();
+    UpdateTimer();
   }
 
   private EnemyView[] getEnemyViewsOnField() {

@@ -8,7 +8,7 @@ clean:
 	rm -f *.class
 
 run: all
-	java Main
+	java Launcher
 
 %.class : %.java
 	javac $^ -Xdiags:verbose

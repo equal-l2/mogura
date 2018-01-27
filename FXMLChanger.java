@@ -7,11 +7,16 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 class FXMLChanger {
-  static void changeTo(EventObject event, String name) {
+  private static Stage s;
+
+  static void setStage(Stage s) {
+    FXMLChanger.s = s;
+  }
+
+  static void changeTo(String name) {
     try {
-    Stage stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
-    stage.setScene(new Scene(FXMLLoader.load(Paths.get(name).toUri().toURL())));
-    stage.show();
+      s.setScene(new Scene(FXMLLoader.load(Paths.get(name).toUri().toURL())));
+      s.show();
     } catch (Exception e) {
       e.printStackTrace();
       Platform.exit();

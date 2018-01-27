@@ -3,12 +3,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class Launcher extends Application {
   @Override
-  public void start(Stage primaryStage) throws Exception {
+  public void start(Stage stage) throws Exception {
+    FXMLChanger.setStage(stage);
     Scene s = new Scene(FXMLLoader.load(getClass().getResource("fxml/Title.fxml")));
-    primaryStage.setScene(s);
-    primaryStage.show();
+    stage.setScene(s);
+    stage.show();
   }
 
   public static void main(String[] args) {
