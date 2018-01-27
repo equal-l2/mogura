@@ -43,6 +43,7 @@ public class MainController implements Initializable {
   private MediaPlayer specialMusic; // スペシャル状態用音楽
   private boolean stateSpecial; // スペシャル状態かを示すブーリアン
   private LinkedList<Enemy> enemyHistory; // 過去にスポーンした敵を記録するキュー
+  private AudioClip donttouchSound;
   private int seconds;
 
   private final Duration defaultSpawnRate = Duration.millis(1000);
@@ -56,9 +57,10 @@ public class MainController implements Initializable {
 
     /* 各種変数初期化 */
     enemyHistory = new LinkedList<Enemy>();
-    specialMusic = new MediaPlayer(new Media(Paths.get("special.wav").toUri().toString()));
+    specialMusic = new MediaPlayer(new Media(Paths.get("sounds/special.wav").toUri().toString()));
     specialMusic.setCycleCount(1);
     specialMusic.setVolume(0.2);
+    donttouchSound = new AudioClip(Paths.get("sounds/bubbu.wav").toUri().toString());
     stateSpecial = false;
     setScore(0);
 
@@ -179,13 +181,12 @@ public class MainController implements Initializable {
   private void destroyDonttouch(EnemyView e) { // 触ってはいけない敵破壊時の処理
     ImageView cross = new ImageView(new Image("cross.png"));
     destroyCommons(e, cross,-10*e.enemy.score);
-    AudioClip a = new AudioClip(Paths.get("bubbu.wav").toUri().toString());
     PauseTransition t = new PauseTransition(Duration.millis(1680));
     t.setOnFinished(ActionEvent -> {
       field.getChildren().remove(e);
       field.getChildren().remove(cross);
     });
-    a.play();
+    donttouchSound.play();
     t.play();
   }
 
