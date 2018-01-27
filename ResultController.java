@@ -19,7 +19,7 @@ public class ResultController implements Initializable {
 
   @FXML
   private void onReturnButtonAction(ActionEvent e) {
-    FXMLManager.setSceneFromFXML("fxml/Title.fxml");
+    FXMLManager.setSceneFromFXML("assets/fxml/Title.fxml");
   }
 
   public void prepareRanking(int score) {

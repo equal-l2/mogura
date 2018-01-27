@@ -79,7 +79,7 @@ public class HowToPlayController implements Initializable {
 
   @FXML
   void onReturnButtonAction(ActionEvent e) {
-    FXMLManager.setSceneFromFXML("fxml/Title.fxml");
+    FXMLManager.setSceneFromFXML("assets/fxml/Title.fxml");
   }
 
 }

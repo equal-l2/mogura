@@ -18,7 +18,7 @@ class Explosion extends ImageView { // 爆発表示クラス
 
   static {
     // 音声と各フレームは事前に読み込む
-    expSound = new AudioClip(Paths.get("sounds/exp.wav").toUri().toString());
+    expSound = new AudioClip(Paths.get("assets/sounds/exp.wav").toUri().toString());
     expImages = IntStream
       .rangeClosed(1,108)
       .mapToObj(i -> String.format("exp/%03d.png",i))

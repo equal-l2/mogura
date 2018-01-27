@@ -57,10 +57,10 @@ public class MainController implements Initializable {
 
     /* 各種変数初期化 */
     enemyHistory = new LinkedList<Enemy>();
-    specialMusic = new MediaPlayer(new Media(Paths.get("sounds/special.wav").toUri().toString()));
+    specialMusic = new MediaPlayer(new Media(Paths.get("assets/sounds/special.wav").toUri().toString()));
     specialMusic.setCycleCount(1);
     specialMusic.setVolume(0.2);
-    donttouchSound = new AudioClip(Paths.get("sounds/bubbu.wav").toUri().toString());
+    donttouchSound = new AudioClip(Paths.get("assets/sounds/bubbu.wav").toUri().toString());
     stateSpecial = false;
     setScore(0);
 
@@ -70,7 +70,7 @@ public class MainController implements Initializable {
       if(seconds <= 0) {
         t.stop();
         specialMusic.stop();
-        FXMLLoader loader = FXMLManager.getFXMLLoader("fxml/Result.fxml");
+        FXMLLoader loader = FXMLManager.getFXMLLoader("assets/fxml/Result.fxml");
         try {
           Scene s = new Scene(loader.load());
           ResultController c = loader.getController();

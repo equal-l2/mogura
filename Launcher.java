@@ -8,9 +8,7 @@ public class Launcher extends Application {
   @Override
   public void start(Stage stage) throws Exception {
     FXMLManager.setStage(stage);
-    Scene s = new Scene(FXMLLoader.load(getClass().getResource("fxml/Title.fxml")));
-    stage.setScene(s);
-    stage.show();
+    FXMLManager.setSceneFromFXML("assets/fxml/Title.fxml");
   }
 
   public static void main(String[] args) {
