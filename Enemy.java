@@ -18,7 +18,7 @@ class Enemy extends Image {
     // 設定ファイルを読み込み
     ArrayList<Enemy> eList = new ArrayList<>();
     try {
-      BufferedReader bfr = Files.newBufferedReader(Paths.get("enemies.conf"));
+      BufferedReader bfr = Files.newBufferedReader(Paths.get("assets/enemies.conf"));
       String line;
       while ((line = bfr.readLine()) != null) {
         line.trim(); // 行頭の空白を取り除く
@@ -47,7 +47,7 @@ class Enemy extends Image {
   }
 
   Enemy(String fileName, String effect) {
-    super("pic/"+fileName); // 画像読み込み
+    super("assets/pic/"+fileName); // 画像読み込み
     final String[] ss = effect.split(":"); // 敵の情報を配列へ
     score = Integer.parseInt(ss[0]);
 

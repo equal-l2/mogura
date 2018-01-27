@@ -44,6 +44,7 @@ public class MainController implements Initializable {
   private boolean stateSpecial; // スペシャル状態かを示すブーリアン
   private LinkedList<Enemy> enemyHistory; // 過去にスポーンした敵を記録するキュー
   private AudioClip donttouchSound;
+  private Image cross;
   private int seconds;
 
   private final Duration defaultSpawnRate = Duration.millis(1000);
@@ -61,6 +62,7 @@ public class MainController implements Initializable {
     specialMusic.setCycleCount(1);
     specialMusic.setVolume(0.2);
     donttouchSound = new AudioClip(Paths.get("assets/sounds/bubbu.wav").toUri().toString());
+    cross = new Image("assets/cross.png");
     stateSpecial = false;
     setScore(0);
 
@@ -179,12 +181,12 @@ public class MainController implements Initializable {
   }
 
   private void destroyDonttouch(EnemyView e) { // 触ってはいけない敵破壊時の処理
-    ImageView cross = new ImageView(new Image("cross.png"));
-    destroyCommons(e, cross,-10*e.enemy.score);
+    ImageView crossView = new ImageView(cross);
+    destroyCommons(e, crossView,-10*e.enemy.score);
     PauseTransition t = new PauseTransition(Duration.millis(1680));
     t.setOnFinished(ActionEvent -> {
       field.getChildren().remove(e);
-      field.getChildren().remove(cross);
+      field.getChildren().remove(crossView);
     });
     donttouchSound.play();
     t.play();

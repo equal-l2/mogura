@@ -21,7 +21,7 @@ class Explosion extends ImageView { // 爆発表示クラス
     expSound = new AudioClip(Paths.get("assets/sounds/exp.wav").toUri().toString());
     expImages = IntStream
       .rangeClosed(1,108)
-      .mapToObj(i -> String.format("exp/%03d.png",i))
+      .mapToObj(i -> String.format("assets/exp/%03d.png",i))
       .map(Image::new)
       .toArray(Image[]::new);
   }
