@@ -1,0 +1,58 @@
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.paint.Color;
+
+public class ResultController implements Initializable {
+  @FXML
+  VBox ranking;
+
+  @Override
+  public void initialize(URL url, ResourceBundle rb) {
+  }
+
+  @FXML
+  private void onReturnButtonAction(ActionEvent e) {
+    FXMLManager.setSceneFromFXML("fxml/Title.fxml");
+  }
+
+  public void prepareRanking(int score) {
+    Ranking r;
+    try {
+      r = RankingManager.load();
+    } catch (Exception e) {
+      r = null;
+      Launcher.abort(e);
+    }
+    final int pos = r.add(score);
+
+    Text[] rankingText = r.toTextArray();
+    Text header = new Text("Score Ranking");
+    header.setTextAlignment(TextAlignment.CENTER);
+    header.setFont(Font.font(30));
+    for(Text t : rankingText) {
+      t.setFont(Font.font(20));
+    }
+    if(pos != -1) {
+      rankingText[pos].setFill(Color.RED);
+      ranking.getChildren().add(header);
+      ranking.getChildren().addAll(rankingText);
+    } else {
+      Text yours = new Text(String.format("Yours : %d", score));
+      yours.setFont(Font.font(20));
+      yours.setFill(Color.BLUE);
+      ranking.getChildren().add(header);
+      ranking.getChildren().addAll(rankingText);
+      ranking.getChildren().add(new Text());
+      ranking.getChildren().add(yours);
+    }
+    RankingManager.write(r);
+  }
+}

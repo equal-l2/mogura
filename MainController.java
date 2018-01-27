@@ -27,6 +27,9 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import javafx.scene.Scene;
+import javafx.fxml.FXMLLoader;
+import javafx.application.Platform;
 
 public class MainController implements Initializable {
   @FXML
@@ -64,14 +67,23 @@ public class MainController implements Initializable {
     Timeline t = new Timeline();
     t.getKeyFrames().add(new KeyFrame(Duration.seconds(1), (ActionEvent) -> {
       if(seconds <= 0) {
-        FXMLChanger.changeTo("fxml/Result.fxml");
         t.stop();
+        specialMusic.stop();
+        FXMLLoader loader = FXMLManager.getFXMLLoader("fxml/Result.fxml");
+        try {
+          Scene s = new Scene(loader.load());
+          ResultController c = loader.getController();
+          c.prepareRanking(score);
+          FXMLManager.setScene(s);
+        } catch (Exception e) {
+          Launcher.abort(e);
+        }
       } else {
         --seconds;
         UpdateTimer();
       }
     }));
-    setTimer(Duration.minutes(1));
+    setTimer(Duration.seconds(10));
     t.setCycleCount(Animation.INDEFINITE);
     t.play();
 

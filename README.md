@@ -20,3 +20,4 @@
 - https://stackoverflow.com/questions/46570494
 - https://stackoverflow.com/questions/15013913
 - https://stackoverflow.com/a/40306146 (ストリームの要素数制限)
+- https://stackoverflow.com/a/31519051 (JavaFXアプリケーションの終了方法)

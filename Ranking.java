@@ -13,7 +13,7 @@ class Ranking {
   }
 
   int add(int i) {
-    if(rankers.get(rankers.size()-1) <= i || rankers.size() < numRankers) {
+    if(rankers.size() < numRankers || rankers.get(rankers.size()-1) <= i) {
       int pos = rankers.size() - 1;
       while (pos >= 0 && rankers.get(pos) <= i) {
         --pos;
