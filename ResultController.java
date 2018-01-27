@@ -35,9 +35,9 @@ public class ResultController implements Initializable {
     Text[] rankingText = r.toTextArray();
     Text header = new Text("Score Ranking");
     header.setTextAlignment(TextAlignment.CENTER);
-    header.setFont(Font.font(30));
+    header.setFont(Font.font(60));
     for(Text t : rankingText) {
-      t.setFont(Font.font(20));
+      t.setFont(Font.font(50));
     }
     if(pos != -1) {
       rankingText[pos].setFill(Color.RED);
@@ -45,7 +45,7 @@ public class ResultController implements Initializable {
       ranking.getChildren().addAll(rankingText);
     } else {
       Text yours = new Text(String.format("Yours : %d", score));
-      yours.setFont(Font.font(20));
+      yours.setFont(Font.font(50));
       yours.setFill(Color.BLUE);
       ranking.getChildren().add(header);
       ranking.getChildren().addAll(rankingText);

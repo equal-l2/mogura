@@ -7,10 +7,10 @@
 
 <VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="800.0" spacing="10.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ResultController">
    <children>
-      <VBox fx:id="ranking" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="327.0" />
+      <VBox fx:id="ranking" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" />
       <Button mnemonicParsing="false" onAction="#onReturnButtonAction" text="Return to Title">
          <font>
-            <Font size="20.0" />
+            <Font size="40.0" />
          </font>
       </Button>
    </children>

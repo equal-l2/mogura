@@ -20,9 +20,9 @@ public class TitleController implements Initializable {
       rankingText = RankingManager.load().toTextArray();
       Text header = new Text("Score Ranking");
       header.setTextAlignment(TextAlignment.CENTER);
-      header.setFont(Font.font(30));
+      header.setFont(Font.font(50));
       for(Text t : rankingText) {
-        t.setFont(Font.font(20));
+        t.setFont(Font.font(40));
       }
       ranking.getChildren().add(header);
       ranking.getChildren().addAll(rankingText);
