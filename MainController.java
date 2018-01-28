@@ -2,12 +2,10 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import javafx.animation.Animation;
-import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
 import javafx.animation.PauseTransition;
-import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -45,8 +43,9 @@ public class MainController {
   private int seconds; // 残り秒数
   private Timeline timer;
 
-  private final Duration defaultSpawnRate = Duration.millis(1000); // デフォルトのスポーン間隔
-  private final Duration specialSpawnRate = Duration.millis(500); // スペシャルタイムのスポーン間隔
+  private static final Duration defaultSpawnRate = Duration.millis(800); // デフォルトのスポーン間隔
+  private static final Duration specialSpawnRate = Duration.millis(400); // スペシャルタイムのスポーン間隔
+  private static final Duration playTime = Duration.seconds(10); // プレイ時間
 
   @FXML
   private void initialize() {
@@ -58,36 +57,44 @@ public class MainController {
     donttouchSound = new AudioClip(Paths.get("assets/sounds/bubbu.wav").toUri().toString());
     cross = new Image("assets/cross.png");
     stateSpecial = false;
-    setScore(0);
+    score = 0;
+    updateScore();
 
     /* タイマー初期化 */
     timer = new Timeline();
     timer.getKeyFrames().add(new KeyFrame(Duration.seconds(1), (ActionEvent) -> {
       if(seconds <= 0) {
-        stop();
-        loadResult();
+        proceedToResult();
       } else {
-        advanceTimer();
+        --seconds;
+        updateTimer();
       }
     }));
-    setTimer(Duration.seconds(10));
+    setTimer(playTime);
     timer.setCycleCount(Animation.INDEFINITE);
     timer.play();
 
     spawner = new Timeline();
     spawner.setCycleCount(Animation.INDEFINITE);
-    setSpawnTimeToDefault();
+    setSpawnTime(defaultSpawnRate);
     spawner.play();
   }
 
-  public void stop() { // 停止用メソッド
+  public void setTimer(Duration d) {
+    seconds = (int) d.toSeconds();
+    updateTimer();
+  }
+
+  private void updateTimer() { // タイマーの表示を更新する
+    timerLabel.setText(String.format("%02d:%02d", seconds/60, seconds%60));
+  }
+
+  private void proceedToResult() { // リザルト画面へ進む
     // タイムライン等は止めないと止まらないので止める
     timer.stop();
     spawner.stop();
     specialMusic.stop();
-  }
 
-  private void loadResult() { // リザルト画面を呼び出す
     FXMLLoader loader = FXMLManager.getFXMLLoader("assets/fxml/Result.fxml");
     try {
       Scene s = new Scene(loader.load());
@@ -97,20 +104,6 @@ public class MainController {
     } catch (Exception e) {
       Launcher.abort(e);
     }
-  }
-
-  private void advanceTimer() { // タイマーを1秒進める
-    --seconds;
-    UpdateTimer();
-  }
-
-  private void UpdateTimer() { // タイマーの表示を更新する
-    timerLabel.setText(String.format("%02d:%02d", seconds/60, seconds%60));
-  }
-
-  private void setTimer(Duration d) { // タイマーの残り時間を設定
-    seconds = (int) d.toSeconds();
-    UpdateTimer();
   }
 
   private EnemyView[] getEnemyViewsOnField() {
@@ -142,7 +135,7 @@ public class MainController {
       // 音楽がループし終わったらスペシャル状態を抜ける
       if (specialMusic.getCurrentCount() == specialMusic.getCycleCount()) {
         specialMusic.stop();
-        setSpawnTimeToDefault();
+        setSpawnTime(defaultSpawnRate);
         stateSpecial = false;
       }
     });
@@ -155,16 +148,12 @@ public class MainController {
     spawner.play();
   }
 
-  private void setSpawnTimeToDefault() { // スポーン間隔をデフォルトに戻す
-    setSpawnTime(defaultSpawnRate); // デフォルトのスポーン間隔をいじるときはここ
+  private void addScore(int i) {
+    score += i;
+    updateScore();
   }
 
-  private void addScore(int i) { // スコア加算
-    setScore(score+i);
-  }
-
-  private void setScore(int i) { // スコア設定　基本的に直接呼んではいけない
-    score = i;
+  private void updateScore() {
     scoreLabel.setText(String.format("Score: %d",score));
   }
 
@@ -228,25 +217,18 @@ public class MainController {
       t
     );
 
-    // 点数のフェードアウト
-    FadeTransition out = new FadeTransition(Duration.millis(500), t);
-    out.setFromValue(1.0);
-    out.setToValue(0.0);
-
-    SequentialTransition trans = new SequentialTransition(
-      new PauseTransition(Duration.millis(1200)), // 敵の表示時間
-      out
-    );
-
-    ParallelTransition p = new ParallelTransition(trans, move);
+    FadeInOut trans = new FadeInOut(Duration.ZERO, Duration.millis(1200), Duration.millis(500), t);
+    trans.setOnFinished((ActionEvent) -> field.getChildren().remove(t));
+    ParallelTransition p = new ParallelTransition(trans.toTransition(), move);
 
     field.getChildren().add(effect); // フィールドにエフェクトを表示
     field.getChildren().add(t); // フィールドに点数を表示
     p.play();
   }
 
-  private void spawnEnemy() { // 敵をスポーンする
-    /* 過去5回でスポーンさせた敵はスポーンさせない */
+  private Enemy getEnemy() {
+    // ランダムな敵を返す
+    // ただし過去5回の敵とかぶらないようにする*/
     Enemy e;
     do {
       e = Enemy.getRandomEnemy();
@@ -256,67 +238,64 @@ public class MainController {
       enemyHistory.remove();
     }
     enemyHistory.add(e);
+    return e;
+  }
 
-    /* 敵の表示を設定 */
-    EnemyView eView = new EnemyView(e);
-    eView.setFitWidth(100); // 敵の幅設定
-    eView.setPreserveRatio(true);
-    eView.setSmooth(true);
-
+  private void relocateEnemy(EnemyView eView) {
     // 敵をランダムな位置へ移動
     // フィールド上の敵と位置が被ったら配置し直す
     // フィールドが埋まっていて適切な位置が見つからなければあきらめる
-    {
-      int i = 0;
-      do {
-        eView.relocate(
-          Math.random()*(field.getWidth()-eView.getRealWidth()),
-          Math.random()*(field.getHeight()-eView.getRealHeight())
+    int i = 0;
+    do {
+      eView.relocate(
+        Math.random()*(field.getWidth()-eView.getRealWidth()),
+        Math.random()*(field.getHeight()-eView.getRealHeight())
         );
-        i++;
-      } while (
-        i < 100 &&
-        Arrays.stream(getEnemyViewsOnField())
-        .anyMatch(eOnField -> eOnField.collideWith(eView))
-      );
-    }
+      i++;
+    } while (
+      i < 100 &&
+      Arrays.stream(getEnemyViewsOnField())
+      .anyMatch(eOnField -> eOnField.collideWith(eView))
+    );
+  }
 
+  private void setHandler(EnemyView eView) {
     // 敵の種類によって適切な処理を指定
     if (stateSpecial) {
       eView.setOnMouseEntered(MouseEvent -> destroyEnemy(eView) );
     } else {
-      switch (e.type) {
-        case ENEMY: {
+      switch (eView.enemy.type) {
+        case ENEMY:
           eView.setOnMouseClicked(MouseEvent -> destroyEnemy(eView));
           break;
-        }
-        case SPECIAL: {
+        case SPECIAL:
           eView.setOnMouseClicked(MouseEvent -> destroySpecial(eView));
           break;
-        }
-        case DONTTOUCH: {
+        case DONTTOUCH:
           eView.setOnMouseClicked(MouseEvent -> destroyDonttouch(eView));
           break;
-        }
       };
     }
+  }
+
+  private void spawnEnemy() { // 敵をスポーンする
+    /* 敵の表示を設定 */
+    EnemyView eView = new EnemyView(getEnemy());
+    eView.setFitWidth(100); // 敵の幅設定
+    eView.setPreserveRatio(true);
+    eView.setSmooth(true);
+
+    relocateEnemy(eView);
+
+    setHandler(eView);
 
     eView.setOpacity(0.0); // フェードインに備えて透明にしておく
 
-    // 敵のフェードイン
-    FadeTransition in = new FadeTransition(Duration.millis(500), eView);
-    in.setFromValue(0.0);
-    in.setToValue(1.0);
-
-    // 敵のフェードアウト
-    FadeTransition out = new FadeTransition(Duration.seconds(1), eView);
-    out.setFromValue(1.0);
-    out.setToValue(0.0);
-
-    SequentialTransition trans = new SequentialTransition(
-      in,
-      new PauseTransition(Duration.seconds(2)), // 敵の表示時間
-      out
+    FadeInOut trans = new FadeInOut(
+      Duration.millis(500),
+      Duration.seconds(2),
+      Duration.seconds(1),
+      eView
     );
 
     trans.setOnFinished(ActionEvent -> {
