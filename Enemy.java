@@ -17,10 +17,11 @@ class Enemy extends Image {
   static {
     // 設定ファイルを読み込み
     ArrayList<Enemy> eList = new ArrayList<>();
-    try {
-      BufferedReader bfr = Files.newBufferedReader(Paths.get("assets/enemies.conf"));
+    try (BufferedReader br = Files
+        .newBufferedReader(Paths.get("assets/enemies.conf"))
+    ) {
       String line;
-      while ((line = bfr.readLine()) != null) {
+      while ((line = br.readLine()) != null) {
         line.trim(); // 行頭の空白を取り除く
 
         /* コメント削除 */
@@ -31,17 +32,26 @@ class Enemy extends Image {
         }
 
         final String[] ss = line.split(" "); // スペースで区切って配列へ
+
+        if (ss.length < 2) { // 行に十分な情報がないとき
+          System.err.println("Too few elems in line : "+line);
+          continue;
+        }
+
         try {
-          eList.add(new Enemy(ss[0], ss[1])); // 得られた設定から敵を生成
+          // 得られた設定から敵を生成
+          eList.add(new Enemy(ss[0], ss[1]));
+        } catch (IllegalArgumentException e) {
+          // ファイル名に問題がある場合
+          System.err.println("Invalid URL : "+ss[0]);
         } catch (Exception e) {
-          // 読めない設定があったらエラーを出す
+          // その他の理由で読めない設定があったらエラーを出す
           System.err.println("Invalid conf line: "+line);
+          e.printStackTrace();
         }
       }
-      bfr.close();
     } catch (Exception e) {
-      e.printStackTrace();
-      System.exit(1);
+      Launcher.abort(e);
     }
     enemies = eList.toArray(new Enemy[eList.size()]);
   }
