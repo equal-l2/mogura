@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -13,56 +14,47 @@ public class HowToPlayController {
 
   @FXML
   private void initialize() {
-    TextFlow[] ts = new TextFlow[6];
+    ArrayList<TextFlow> ts = new ArrayList<>();
 
-    Text[] t1 = new Text[3];
-    t1[0] = new Text("憎きあの大学を");
-    t1[1] = new Text("爆破");
-    t1[2] = new Text("しよう！");
-    t1[1].setFill(Color.RED);
-    ts[0] = new TextFlow(t1);
+    ArrayList<Text> t1 = new ArrayList<>();
+    t1.add(new Text("色んな思いを込めてあの大学を"));
+    t1.add(new Text("クリックで爆破"));
+    t1.add(new Text("しよう！"));
+    t1.get(1).setFill(Color.RED);
+    ts.add(new TextFlow(t1.toArray(new Text[t1.size()])));
 
-    Text[] t2 = new Text[3];
-    t2[0] = new Text("大学を爆破すると");
-    t2[1] = new Text("偏差値が得点");
-    t2[2] = new Text("になります。");
-    t2[1].setFill(Color.RED);
-    ts[1] = new TextFlow(t2);
+    ArrayList<Text> t2 = new ArrayList<>();
+    t2.add(new Text("大学を爆破すると"));
+    t2.add(new Text("偏差値が得点"));
+    t2.add(new Text("になります。"));
+    t2.get(1).setFill(Color.RED);
+    ts.add(new TextFlow(t2.toArray(new Text[t2.size()])));
 
-    Text[] t3 = new Text[4];
-    t3[0] = new Text("ただし、訴えられてしまうので");
-    t3[1] = new Text("私立大学は爆破しては\n");
-    t3[2] = new Text("いけません");
-    t3[3] = new Text("。");
-    t3[1].setFill(Color.RED);
-    t3[2].setFill(Color.RED);
-    ts[2] = new TextFlow(t3);
+    ArrayList<Text> t3 = new ArrayList<>();
+    t3.add(new Text("ただし、訴えられてしまうので"));
+    t3.add(new Text("私立大学は爆破しては\nいけません"));
+    t3.add(new Text("。具体的には"));
+    t3.add(new Text("偏差値×10の減点"));
+    t3.add(new Text("です。"));
+    t3.get(1).setFill(Color.RED);
+    t3.get(3).setFill(Color.RED);
+    ts.add(new TextFlow(t3.toArray(new Text[t3.size()])));
 
-    Text[] t4 = new Text[3];
-    t4[0] = new Text("具体的には");
-    t4[1] = new Text("偏差値×10の減点");
-    t4[2] = new Text("です。");
-    t4[1].setFill(Color.RED);
-    ts[3] = new TextFlow(t4);
-
-    Text[] t5 = new Text[5];
-    t5[0] = new Text("静○大学");
-    t5[1] = new Text("か");
-    t5[2] = new Text("筑○大学");
-    t5[3] = new Text("を爆破すると、テンションが\n");
-    t5[4] = new Text("上がって私大も怖くなくなります");
-    t5[0].setFill(Color.RED);
-    t5[2].setFill(Color.RED);
-    ts[4] = new TextFlow(t5);
-
-    Text[] t6 = new Text[4];
-    t6[0] = new Text("具体的には、一定時間");
-    t6[1] = new Text("触れるだけで爆破できるように\n");
-    t6[2] = new Text("なり、私大も爆破できる");
-    t6[3] = new Text("ようになります。");
-    t6[1].setFill(Color.RED);
-    t6[2].setFill(Color.RED);
-    ts[5] = new TextFlow(t6);
+    ArrayList<Text> t4 = new ArrayList<>();
+    t4.add(new Text("静○大学"));
+    t4.add(new Text("か"));
+    t4.add(new Text("筑○大学"));
+    t4.add(new Text("を爆破すると、調子に乗るので\n私大も怖くなくなります。具体的には"));
+    t4.add(new Text("一定時間"));
+    t4.add(new Text("触れる\nだけ"));
+    t4.add(new Text("で大学を爆破できるようになり、また"));
+    t4.add(new Text("私大も爆破\nできる"));
+    t4.add(new Text("ようになります。"));
+    t4.get(0).setFill(Color.RED);
+    t4.get(2).setFill(Color.RED);
+    t4.get(5).setFill(Color.RED);
+    t4.get(7).setFill(Color.RED);
+    ts.add(new TextFlow(t4.toArray(new Text[t4.size()])));
 
     for(TextFlow tf : ts) {
       for(Node t : tf.getChildren()) {
