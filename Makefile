@@ -2,13 +2,10 @@
 
 SRCS = $(wildcard *.java)
 
-all: $(SRCS:.java=.class)
-
+all:
+	javac *.java
 clean:
 	rm -f *.class
 
 run: all
 	java Launcher
-
-%.class : %.java
-	javac $^ -Xdiags:verbose

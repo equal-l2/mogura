@@ -38,7 +38,6 @@ public class MainController {
   private static final Duration playTime = Duration.seconds(10); // プレイ時間
 
   private int score = 0; // スコア
-  private int seconds = (int)playTime.toSeconds(); // 残り秒数
   private boolean stateSpecial = false; // スペシャル状態かを示すブーリアン
 
   private final Timeline spawner = new Timeline(); // 敵表示用
@@ -55,42 +54,28 @@ public class MainController {
 
   private final Image cross = new Image("assets/cross.png"); // 触れてはいけない敵をクリックした時の画像
 
-  private final Timeline timer = new Timeline( // タイマー用
-    new KeyFrame(Duration.seconds(1), (ActionEvent) -> {
-      if(seconds <= 0) {
-        proceedToResult();
-      } else {
-        --seconds;
-        updateTimer();
-      }
-    })
-  );
+  private final CountDownTimer timer = new CountDownTimer(playTime);
 
   @FXML
   private void initialize() {
     /* 各種設定 */
     specialMusic.setCycleCount(1);
     specialMusic.setVolume(0.2);
-    timer.setCycleCount(Animation.INDEFINITE);
     spawner.setCycleCount(Animation.INDEFINITE);
     setSpawnTime(defaultSpawnRate);
+    timer.setOnTimeUp(() -> proceedToResult());
+    timerLabel.textProperty().bind(timer.getBinding());
 
     /* ラベル更新 */
     updateScore();
-    updateTimer();
 
     /* Timeline開始 */
     timer.play();
     spawner.play();
   }
 
-  private void updateTimer() { // タイマーの表示を更新する
-    timerLabel.setText(String.format("%02d:%02d", seconds/60, seconds%60));
-  }
-
   private void proceedToResult() { // リザルト画面へ進む
     // タイムライン等は止めないと止まらないので止める
-    timer.stop();
     spawner.stop();
     specialMusic.stop();
 
