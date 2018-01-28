@@ -33,56 +33,55 @@ public class MainController {
   @FXML
   private Label timerLabel; // タイマー表示用ラベル
 
-  private int score; // スコア
-  private Timeline spawner; // 敵表示用タイムライン
-  private MediaPlayer specialMusic; // スペシャル状態用音楽
-  private boolean stateSpecial; // スペシャル状態かを示すブーリアン
-  private LinkedList<Enemy> enemyHistory; // 過去にスポーンした敵を記録するキュー
-  private AudioClip donttouchSound; // 触れてはいけない敵をクリックしたときの音
-  private Image cross; // 触れてはいけない敵をクリックした時の画像
-  private int seconds; // 残り秒数
-  private Timeline timer;
-
   private static final Duration defaultSpawnRate = Duration.millis(800); // デフォルトのスポーン間隔
   private static final Duration specialSpawnRate = Duration.millis(400); // スペシャルタイムのスポーン間隔
   private static final Duration playTime = Duration.seconds(10); // プレイ時間
 
-  @FXML
-  private void initialize() {
-    /* 各種変数初期化 */
-    enemyHistory = new LinkedList<Enemy>();
-    specialMusic = new MediaPlayer(new Media(Paths.get("assets/sounds/special.wav").toUri().toString()));
-    specialMusic.setCycleCount(1);
-    specialMusic.setVolume(0.2);
-    donttouchSound = new AudioClip(Paths.get("assets/sounds/bubbu.wav").toUri().toString());
-    cross = new Image("assets/cross.png");
-    stateSpecial = false;
-    score = 0;
-    updateScore();
+  private int score = 0; // スコア
+  private int seconds = (int)playTime.toSeconds(); // 残り秒数
+  private boolean stateSpecial = false; // スペシャル状態かを示すブーリアン
 
-    /* タイマー初期化 */
-    timer = new Timeline();
-    timer.getKeyFrames().add(new KeyFrame(Duration.seconds(1), (ActionEvent) -> {
+  private final Timeline spawner = new Timeline(); // 敵表示用
+
+  private final MediaPlayer specialMusic = new MediaPlayer( // スペシャル状態用音楽
+    new Media(Paths.get("assets/sounds/special.wav").toUri().toString())
+  );
+
+  private final LinkedList<Enemy> enemyHistory = new LinkedList<>(); // 過去にスポーンした敵を記録するキュー
+
+  private final AudioClip donttouchSound = new AudioClip( // 触れてはいけない敵をクリックしたときの音
+    Paths.get("assets/sounds/bubbu.wav").toUri().toString()
+  );
+
+  private final Image cross = new Image("assets/cross.png"); // 触れてはいけない敵をクリックした時の画像
+
+  private final Timeline timer = new Timeline( // タイマー用
+    new KeyFrame(Duration.seconds(1), (ActionEvent) -> {
       if(seconds <= 0) {
         proceedToResult();
       } else {
         --seconds;
         updateTimer();
       }
-    }));
-    setTimer(playTime);
-    timer.setCycleCount(Animation.INDEFINITE);
-    timer.play();
+    })
+  );
 
-    spawner = new Timeline();
+  @FXML
+  private void initialize() {
+    /* 各種設定 */
+    specialMusic.setCycleCount(1);
+    specialMusic.setVolume(0.2);
+    timer.setCycleCount(Animation.INDEFINITE);
     spawner.setCycleCount(Animation.INDEFINITE);
     setSpawnTime(defaultSpawnRate);
-    spawner.play();
-  }
 
-  public void setTimer(Duration d) {
-    seconds = (int) d.toSeconds();
+    /* ラベル更新 */
+    updateScore();
     updateTimer();
+
+    /* Timeline開始 */
+    timer.play();
+    spawner.play();
   }
 
   private void updateTimer() { // タイマーの表示を更新する

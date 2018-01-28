@@ -3,10 +3,9 @@ import javafx.scene.text.Text;
 
 public class Ranking { // ランキング用オブジェクト
   public static final int numRankers = 5; // ランキングの最大人数
-  private ArrayList<Integer> rankers; // ランキングを入れるリスト
+  private ArrayList<Integer> rankers = new ArrayList<>(); // ランキングを入れるリスト
 
   public Ranking(int[] rankers) {
-    this.rankers = new ArrayList<>();
     // 配列が最大人数より長いときは余剰分を切り落とす
     for(int i = 0; i < rankers.length && i < numRankers; ++i) {
       this.rankers.add(rankers[i]);
