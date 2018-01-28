@@ -47,7 +47,7 @@ public class Ranking { // ランキング用オブジェクト
   public Text[] toTextArray() {
     // ランキングをText配列で返す
     // スコアが少ない場合も最大人数分を返す
-    Text[] t = new Text[5];
+    Text[] t = new Text[numRankers];
     for(int i = 0; i < numRankers; ++i) {
       if(i < rankers.size()) {
         t[i] = new Text(String.format("%d : %d", i+1, rankers.get(i)));
