@@ -22,7 +22,7 @@ public class ResultController implements Initializable {
     FXMLManager.setSceneFromFXML("assets/fxml/Title.fxml");
   }
 
-  public void prepareRanking(int score) {
+  public void prepareRanking(int score) { // ランキング表示の準備
     Ranking r;
     try {
       r = RankingManager.load();
@@ -32,6 +32,7 @@ public class ResultController implements Initializable {
     }
     final int pos = r.add(score);
 
+    /* ランキング表示生成 */
     Text[] rankingText = r.toTextArray();
     Text header = new Text("Score Ranking");
     header.setTextAlignment(TextAlignment.CENTER);
@@ -39,11 +40,11 @@ public class ResultController implements Initializable {
     for(Text t : rankingText) {
       t.setFont(Font.font(50));
     }
-    if(pos != -1) {
+    if(pos != -1) { // ランクインしたら点数を赤で塗る
       rankingText[pos].setFill(Color.RED);
       ranking.getChildren().add(header);
       ranking.getChildren().addAll(rankingText);
-    } else {
+    } else { // ランクインしなかったらランキングの下に点数を出す
       Text yours = new Text(String.format("Yours : %d", score));
       yours.setFont(Font.font(50));
       yours.setFill(Color.BLUE);

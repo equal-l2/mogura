@@ -36,26 +36,23 @@ public class MainController implements Initializable {
   @FXML
   private Pane field; // 敵表示用ペイン（「フィールド」）
   @FXML
-  private Label timer;
+  private Label timerLabel; // タイマー表示用ラベル
 
-  private int score;
+  private int score; // スコア
   private Timeline spawner; // 敵表示用タイムライン
   private MediaPlayer specialMusic; // スペシャル状態用音楽
   private boolean stateSpecial; // スペシャル状態かを示すブーリアン
   private LinkedList<Enemy> enemyHistory; // 過去にスポーンした敵を記録するキュー
-  private AudioClip donttouchSound;
-  private Image cross;
-  private int seconds;
+  private AudioClip donttouchSound; // 触れてはいけない敵をクリックしたときの音
+  private Image cross; // 触れてはいけない敵をクリックした時の画像
+  private int seconds; // 残り秒数
+  private Timeline timer;
 
-  private final Duration defaultSpawnRate = Duration.millis(1000);
-  private final Duration specialSpawnRate = Duration.millis(500);
+  private final Duration defaultSpawnRate = Duration.millis(1000); // デフォルトのスポーン間隔
+  private final Duration specialSpawnRate = Duration.millis(500); // スペシャルタイムのスポーン間隔
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
-    /* staticコンストラクタをあらかじめ呼ぶための処理 */
-    new Explosion();
-    Enemy.getRandomEnemy();
-
     /* 各種変数初期化 */
     enemyHistory = new LinkedList<Enemy>();
     specialMusic = new MediaPlayer(new Media(Paths.get("assets/sounds/special.wav").toUri().toString()));
@@ -67,28 +64,18 @@ public class MainController implements Initializable {
     setScore(0);
 
     /* タイマー初期化 */
-    Timeline t = new Timeline();
-    t.getKeyFrames().add(new KeyFrame(Duration.seconds(1), (ActionEvent) -> {
+    timer = new Timeline();
+    timer.getKeyFrames().add(new KeyFrame(Duration.seconds(1), (ActionEvent) -> {
       if(seconds <= 0) {
-        t.stop();
-        specialMusic.stop();
-        FXMLLoader loader = FXMLManager.getFXMLLoader("assets/fxml/Result.fxml");
-        try {
-          Scene s = new Scene(loader.load());
-          ResultController c = loader.getController();
-          c.prepareRanking(score);
-          FXMLManager.setScene(s);
-        } catch (Exception e) {
-          Launcher.abort(e);
-        }
+        stop();
+        loadResult();
       } else {
-        --seconds;
-        UpdateTimer();
+        advanceTimer();
       }
     }));
     setTimer(Duration.seconds(10));
-    t.setCycleCount(Animation.INDEFINITE);
-    t.play();
+    timer.setCycleCount(Animation.INDEFINITE);
+    timer.play();
 
     spawner = new Timeline();
     spawner.setCycleCount(Animation.INDEFINITE);
@@ -96,16 +83,41 @@ public class MainController implements Initializable {
     spawner.play();
   }
 
-  private void UpdateTimer() {
-    timer.setText(String.format("%02d:%02d", seconds/60, seconds%60));
+  public void stop() { // 停止用メソッド
+    // タイムライン等は止めないと止まらないので止める
+    timer.stop();
+    spawner.stop();
+    specialMusic.stop();
   }
 
-  private void setTimer(Duration d) {
+  private void loadResult() { // リザルト画面を呼び出す
+    FXMLLoader loader = FXMLManager.getFXMLLoader("assets/fxml/Result.fxml");
+    try {
+      Scene s = new Scene(loader.load());
+      ResultController c = loader.getController();
+      c.prepareRanking(score);
+      FXMLManager.setScene(s);
+    } catch (Exception e) {
+      Launcher.abort(e);
+    }
+  }
+
+  private void advanceTimer() { // タイマーを1秒進める
+    --seconds;
+    UpdateTimer();
+  }
+
+  private void UpdateTimer() { // タイマーの表示を更新する
+    timerLabel.setText(String.format("%02d:%02d", seconds/60, seconds%60));
+  }
+
+  private void setTimer(Duration d) { // タイマーの残り時間を設定
     seconds = (int) d.toSeconds();
     UpdateTimer();
   }
 
   private EnemyView[] getEnemyViewsOnField() {
+    // フィールド上の敵を配列に入れて返す
     return field.getChildren()
       .filtered(node -> {
         return node instanceof EnemyView;
@@ -129,7 +141,8 @@ public class MainController implements Initializable {
 
     setSpawnTime(specialSpawnRate); // スポーン間隔を早める
 
-    specialMusic.setOnEndOfMedia(() -> { // 音楽がループし終わったらスペシャル状態を抜ける
+    specialMusic.setOnEndOfMedia(() -> {
+      // 音楽がループし終わったらスペシャル状態を抜ける
       if (specialMusic.getCurrentCount() == specialMusic.getCycleCount()) {
         specialMusic.stop();
         setSpawnTimeToDefault();
@@ -192,7 +205,9 @@ public class MainController implements Initializable {
     t.play();
   }
 
-  private void destroyCommons(EnemyView enemy, ImageView effect, int scoreDelta) { // 敵破壊時の共通処理
+  private void destroyCommons(EnemyView enemy, ImageView effect, int scoreDelta) {
+    // 敵破壊時の共通処理
+
     addScore(scoreDelta);
 
     /* 敵の処理 */
@@ -206,8 +221,8 @@ public class MainController implements Initializable {
 
     /* 点数表示の処理 */
     Text t = new Text(Integer.toString(scoreDelta));
-    if (scoreDelta < 0) t.setFill(Color.RED);
-    t.setFont(Font.font(40));
+    if (scoreDelta < 0) t.setFill(Color.RED); // 減点のときは赤にする
+    t.setFont(Font.font(40)); // フォントサイズ
     t.relocate(enemy.getLayoutX(),enemy.getLayoutY()); // 点数の位置を敵に合わせる
 
     PathTransition move = new PathTransition( // 点数は表示後上に移動していく
@@ -268,6 +283,7 @@ public class MainController implements Initializable {
         .anyMatch(eOnField -> eOnField.collideWith(eView))
       );
     }
+
     // 敵の種類によって適切な処理を指定
     if (stateSpecial) {
       eView.setOnMouseEntered(MouseEvent -> destroyEnemy(eView) );

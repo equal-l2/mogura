@@ -1,6 +1,5 @@
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -15,6 +14,7 @@ public class TitleController implements Initializable {
 
   @Override
   public void initialize(URL url, ResourceBundle rb) {
+    // ランキングを表示する
     Text[] rankingText;
     try {
       rankingText = RankingManager.load().toTextArray();
@@ -27,19 +27,17 @@ public class TitleController implements Initializable {
       ranking.getChildren().add(header);
       ranking.getChildren().addAll(rankingText);
     } catch (Exception e) {
-      e.printStackTrace();
-      Platform.exit();
-      System.exit(1);
+      Launcher.abort(e);
     }
   }
 
   @FXML
-  void onStartButtonAction(ActionEvent e) {
+  private void onStartButtonAction(ActionEvent e) {
     FXMLManager.setSceneFromFXML("assets/fxml/Main.fxml");
   }
 
   @FXML
-  void onHowToPlayButtonAction(ActionEvent e) {
+  private void onHowToPlayButtonAction(ActionEvent e) {
     FXMLManager.setSceneFromFXML("assets/fxml/HowToPlay.fxml");
   }
 }

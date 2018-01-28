@@ -10,11 +10,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
 
-class Explosion extends ImageView { // 爆発表示クラス
-  static final private Image[] expImages;
-  static final private AudioClip expSound;
-  private final Timeline tl;
-  private double rate;
+public class Explosion extends ImageView { // 爆発表示クラス
+  static final private Image[] expImages; // 爆発動画のフレーム
+  static final private AudioClip expSound; // 爆発音
+  private final Timeline tl; // 動画のフレーム切り替え用
+  private double rate; // 再生速度
 
   static {
     // 音声と各フレームは事前に読み込む
@@ -26,12 +26,12 @@ class Explosion extends ImageView { // 爆発表示クラス
       .toArray(Image[]::new);
   }
 
-  Explosion() {
+  public Explosion() {
     tl = new Timeline();
     rate = 1.0;
   }
 
-  void play() {
+  public void play() {
       expSound.setRate(rate); // 音声再生速度を設定
 
       /* 爆発動画を設定 */
@@ -53,11 +53,11 @@ class Explosion extends ImageView { // 爆発表示クラス
       tl.play();
   }
 
-  void setOnFinished(EventHandler<ActionEvent> e) {
+  public void setOnFinished(EventHandler<ActionEvent> e) {
     tl.setOnFinished(e);
   }
 
-  void setRate(double rate) { // 再生速度を設定
+  public void setRate(double rate) { // 再生速度を設定
     this.rate = rate;
   }
 }

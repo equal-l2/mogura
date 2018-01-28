@@ -1,26 +1,29 @@
 import java.nio.file.Paths;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-class FXMLManager {
+class FXMLManager { // FXML周りを楽にする
   private static Stage stage;
 
-  static void setStage(Stage s) {
+  public static void setStage(Stage s) {
+    // SceneをセットするStageを設定
     FXMLManager.stage = s;
   }
 
-  static void setSceneFromFXML(String name) {
+  public static void setSceneFromFXML(String name) {
+    // FXMLを読み込んでSceneを切り替える
     setScene(getSceneFromFXML(name));
   }
 
-  static void setScene(Scene s) {
-      stage.setScene(s);
-      stage.show();
+  public static void setScene(Scene s) {
+    // Sceneを切り替える
+    stage.setScene(s);
+    stage.show();
   }
 
-  static Scene getSceneFromFXML(String name) {
+  public static Scene getSceneFromFXML(String name) {
+    // FXMLからSceneを生成する
     try {
       return new Scene(FXMLLoader.load(Paths.get(name).toUri().toURL()));
     } catch (Exception e) {
@@ -29,13 +32,13 @@ class FXMLManager {
     return null;
   }
 
-  static FXMLLoader getFXMLLoader(String name) {
+  public static FXMLLoader getFXMLLoader(String name) {
+    // FXMLからFXMLLoaderを生成する
+    // 外部からコントローラにアクセスするにはこれを使うしかない
     try {
       return new FXMLLoader(Paths.get(name).toUri().toURL());
     } catch (Exception e) {
-      e.printStackTrace();
-      Platform.exit();
-      System.exit(1);
+      Launcher.abort(e);
     }
     return null;
   }

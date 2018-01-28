@@ -4,12 +4,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-class RankingManager {
-  static final Path filePath = Paths.get("rankers.dat");
+public class RankingManager { // ランキングとファイルの間を取り持つ
+  private static final Path filePath = Paths.get("rankers.dat");
 
-  static Ranking load() {
+  public static Ranking load() {
+    // ファイルを読み込んでランキングを返す
     try {
-      if (!Files.exists(filePath)) Files.createFile(filePath);
+      if (!Files.exists(filePath)) {
+        // ファイルがない状態で読み込むとエラーになる
+        // ので新規生成する
+        Files.createFile(filePath);
+      }
       int[] rankers = Files.lines(filePath).mapToInt(Integer::parseInt).toArray();
       return new Ranking(rankers);
     } catch (Exception e) {
@@ -18,7 +23,8 @@ class RankingManager {
     return null;
   }
 
-  static void write(Ranking r) {
+  public static void write(Ranking r) {
+    // ランキングをファイルへ書き込む
     try (PrintWriter pw = new PrintWriter(Files.newBufferedWriter(filePath))){
       Arrays.stream(r.toIntArray()).forEach(pw::println);
     } catch (Exception e) {

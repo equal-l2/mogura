@@ -4,7 +4,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import javafx.scene.image.Image;
 
-class Enemy extends Image {
+public class Enemy extends Image { // 敵クラス
   enum TYPE {
     ENEMY, // 通常敵
     SPECIAL, // スペシャル敵
@@ -56,7 +56,7 @@ class Enemy extends Image {
     enemies = eList.toArray(new Enemy[eList.size()]);
   }
 
-  Enemy(String fileName, String effect) {
+  private Enemy(String fileName, String effect) {
     super("assets/pic/"+fileName); // 画像読み込み
     final String[] ss = effect.split(":"); // 敵の情報を配列へ
     score = Integer.parseInt(ss[0]);
