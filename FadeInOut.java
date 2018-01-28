@@ -1,13 +1,15 @@
-import javafx.animation.Transition;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
+import javafx.animation.Transition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.util.Duration;
 
 public class FadeInOut {
+  // フェードイン -> ポーズ -> フェードアウトを一括で行う
+
   private SequentialTransition t;
 
   public FadeInOut(Duration dIn, Duration dPause, Duration dOut, Node n) {
@@ -33,6 +35,8 @@ public class FadeInOut {
   }
 
   public Transition toTransition() {
+    // 中身のTransitionを取り出す
+    // どうしても使う必要のある時以外は使ってほしくない
     return t;
   }
 }

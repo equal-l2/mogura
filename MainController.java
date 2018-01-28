@@ -95,11 +95,12 @@ public class MainController {
     spawner.stop();
     specialMusic.stop();
 
+    // リザルト画面をロード
     FXMLLoader loader = FXMLManager.getFXMLLoader("assets/fxml/Result.fxml");
     try {
       Scene s = new Scene(loader.load());
       ResultController c = loader.getController();
-      c.prepareRanking(score);
+      c.prepareRanking(score); // スコアを渡してランキングを表示させる
       FXMLManager.setScene(s);
     } catch (Exception e) {
       Launcher.abort(e);
