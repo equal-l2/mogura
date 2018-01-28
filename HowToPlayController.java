@@ -1,8 +1,5 @@
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -10,12 +7,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
-public class HowToPlayController implements Initializable {
+public class HowToPlayController {
   @FXML
-  VBox desc;
+  private VBox desc;
 
-  @Override
-  public void initialize(URL url, ResourceBundle rb) {
+  @FXML
+  private void initialize() {
     TextFlow[] ts = new TextFlow[6];
 
     Text[] t1 = new Text[3];

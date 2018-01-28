@@ -1,8 +1,6 @@
-import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.ResourceBundle;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -13,7 +11,6 @@ import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -30,7 +27,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-public class MainController implements Initializable {
+public class MainController {
   @FXML
   private Label scoreLabel; // スコア表示用ラベル
   @FXML
@@ -51,8 +48,8 @@ public class MainController implements Initializable {
   private final Duration defaultSpawnRate = Duration.millis(1000); // デフォルトのスポーン間隔
   private final Duration specialSpawnRate = Duration.millis(500); // スペシャルタイムのスポーン間隔
 
-  @Override
-  public void initialize(URL url, ResourceBundle rb) {
+  @FXML
+  private void initialize() {
     /* 各種変数初期化 */
     enemyHistory = new LinkedList<Enemy>();
     specialMusic = new MediaPlayer(new Media(Paths.get("assets/sounds/special.wav").toUri().toString()));

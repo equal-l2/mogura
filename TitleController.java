@@ -1,19 +1,16 @@
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-public class TitleController implements Initializable {
+public class TitleController {
   @FXML
-  VBox ranking;
+  private VBox ranking;
 
-  @Override
-  public void initialize(URL url, ResourceBundle rb) {
+  @FXML
+  private void initialize() {
     // ランキングを表示する
     Text[] rankingText;
     try {

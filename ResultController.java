@@ -1,21 +1,14 @@
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-public class ResultController implements Initializable {
+public class ResultController {
   @FXML
-  VBox ranking;
-
-  @Override
-  public void initialize(URL url, ResourceBundle rb) {
-  }
+  private VBox ranking;
 
   @FXML
   private void onReturnButtonAction(ActionEvent e) {
