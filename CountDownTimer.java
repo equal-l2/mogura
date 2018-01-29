@@ -8,7 +8,7 @@ import javafx.scene.control.Label;
 import javafx.util.Duration;
 
 public class CountDownTimer {
-  private static final long tick = 10; // 1tickあたりのミリ秒
+  private static final long tick = 50; // 1tickあたりのミリ秒
   private SimpleLongProperty millis = new SimpleLongProperty(); // 残り秒数
   private Runnable onTimeUp;
   private Runnable onTick;
