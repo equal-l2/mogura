@@ -10,7 +10,7 @@
       <VBox fx:id="desc" spacing="30.0" />
       <Button mnemonicParsing="false" onAction="#onReturnButtonAction" text="Return to Title">
          <font>
-            <Font size="40.0" />
+            <Font size="30.0" />
          </font>
       </Button>
    </children>

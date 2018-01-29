@@ -37,12 +37,12 @@
                <children>
                   <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onStartButtonAction" prefWidth="280.0" text="Start">
                      <font>
-                        <Font size="40.0" />
+                        <Font size="30.0" />
                      </font>
                   </Button>
                   <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onHowToPlayButtonAction" prefWidth="280.0" text="How to Play">
                      <font>
-                        <Font size="40.0" />
+                        <Font size="30.0" />
                      </font>
                   </Button>
                </children>
