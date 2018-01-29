@@ -7,6 +7,7 @@ import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,12 +22,11 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import javafx.beans.binding.Bindings;
 
 public class MainController {
   @FXML
@@ -40,7 +40,7 @@ public class MainController {
 
   private static final Duration defaultSpawnRate = Duration.millis(800); // デフォルトのスポーン間隔
   private static final Duration specialSpawnRate = Duration.millis(400); // スペシャルタイムのスポーン間隔
-  private static final Duration playTime = Duration.seconds(60); // プレイ時間
+  private static final Duration playTime = Duration.seconds(10); // プレイ時間
 
   private int score = 0; // スコア
   private boolean stateSpecial = false; // スペシャル状態かを示すブーリアン
@@ -59,7 +59,8 @@ public class MainController {
 
   private final Image cross = new Image("assets/cross.png"); // 触れてはいけない敵をクリックした時の画像
 
-  private final CountDownTimer timer = new CountDownTimer(playTime);
+  private final CountDownTimer playTimer = new CountDownTimer(playTime);
+  private CountDownTimer specialTimer;
 
   private double maxBarWidth;
 
@@ -70,34 +71,12 @@ public class MainController {
     specialMusic.setVolume(0.2);
     spawner.setCycleCount(Animation.INDEFINITE);
     setSpawnTime(defaultSpawnRate);
-    timer.setOnTimeUp(() -> proceedToResult());
-    timerLabel.textProperty().bind(timer.getBinding());
+    playTimer.setOnTimeUp(() -> proceedToResult());
+    timerLabel.textProperty().bind(Bindings.createStringBinding(
+      () -> String.format("%02d:%02d", (int) playTimer.getTime().toMinutes(), (int) playTimer.getTime().toSeconds()),
+      playTimer.millisProperty()
+    ));
     updateScore();
-
-    /* スペシャルタイムの残り時間表示 */
-    specialBar.widthProperty().bind(
-      Bindings.createDoubleBinding(
-        () -> {
-          if(!stateSpecial) {
-            return 0.0;
-          } else {
-            System.out.println("currentTime:"+specialMusic.getCurrentTime().toString());
-            final Duration elapsedTime = specialMusic
-              .getMedia().getDuration()
-              .multiply(
-                  specialMusic.getCurrentCount()
-                  )
-              .add(specialMusic.getCurrentTime());
-            final Duration totalTime = specialMusic.getTotalDuration();
-            final Duration remainingTime = totalTime.subtract(elapsedTime);
-            return (remainingTime.toMillis()/totalTime.toMillis())*maxBarWidth;
-          }
-        },
-        specialMusic.statusProperty(),
-        specialMusic.currentCountProperty(),
-        specialMusic.currentTimeProperty()
-      )
-    );
 
     specialMusic.setOnEndOfMedia(() -> {
       // 音楽がループし終わったらスペシャル状態を抜ける
@@ -110,13 +89,15 @@ public class MainController {
     });
 
     /* Timeline開始 */
-    timer.play();
+    playTimer.play();
     spawner.play();
   }
 
   private void proceedToResult() { // リザルト画面へ進む
     // タイムライン等は止めないと止まらないので止める
     spawner.stop();
+    playTimer.stop();
+    if(specialTimer != null) specialTimer.stop();
     specialMusic.stop();
 
     // リザルト画面をロード
@@ -143,13 +124,12 @@ public class MainController {
   }
 
   private void enableSpecial() { // スペシャル状態に入る
+    if(stateSpecial) return;
+    stateSpecial = true;
+
     // スペシャル時間表示バーの最大幅を設定
     final VBox parent = (VBox) specialBar.getParent().getParent();
     maxBarWidth = parent.getWidth()-parent.getPadding().getLeft()-parent.getPadding().getRight();
-
-    if (stateSpecial) { return; } // すでにスペシャル状態なら何もしない
-    stateSpecial = true;
-
 
     /* フィールド上の敵を全爆破 */
     EnemyView[] eList = getEnemyViewsOnField();
@@ -161,6 +141,12 @@ public class MainController {
 
     setSpawnTime(specialSpawnRate); // スポーン間隔を早める
 
+    specialTimer = new CountDownTimer(specialMusic.getTotalDuration());
+    specialTimer.setOnTick( () -> {
+      setBar(specialTimer.getTime());
+    });
+
+    specialTimer.play();
     specialMusic.play();
   }
 
@@ -177,6 +163,16 @@ public class MainController {
 
   private void updateScore() {
     scoreLabel.setText(String.format("Score: %d",score));
+  }
+
+  private void setBar(Duration d) {
+    if(!stateSpecial) {
+      specialBar.setWidth(0.0);
+    } else {
+      final Duration totalTime = specialMusic.getTotalDuration();
+      final Duration remainingTime = d;
+      specialBar.setWidth((remainingTime.toMillis()/totalTime.toMillis())*maxBarWidth);
+    }
   }
 
   private void destroyEnemy(EnemyView e) { // 敵破壊時の処理
