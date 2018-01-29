@@ -12,8 +12,8 @@ import javafx.util.Duration;
 
 public class Explosion extends ImageView { // 爆発表示クラス
   static final private Image[] expImages = IntStream // 爆発動画のフレーム
-    .rangeClosed(1,108)
-    .mapToObj(i -> String.format("assets/exp/%03d.png",i))
+    .rangeClosed(1,56)
+    .mapToObj(i -> String.format("assets/exp/%02d.png",i))
     .map(Image::new)
     .toArray(Image[]::new);
 
@@ -30,7 +30,7 @@ public class Explosion extends ImageView { // 爆発表示クラス
       /* 爆発動画を設定 */
       ObservableList<KeyFrame> kf = tl.getKeyFrames();
       kf.clear();
-      final double frameRate = 24*rate; // フレームレート
+      final double frameRate = 12*rate; // フレームレート
       Duration frameTime = Duration.ZERO;
       final Duration frameGap = Duration.millis(1000/frameRate);
       for(final Image i : expImages) {
