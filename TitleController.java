@@ -1,9 +1,10 @@
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 
 public class TitleController {
   @FXML
@@ -12,20 +13,28 @@ public class TitleController {
   @FXML
   private void initialize() {
     // ランキングを表示する
-    Text[] rankingText;
-    try {
-      rankingText = RankingManager.load().toTextArray();
-      Text header = new Text("Score Ranking");
-      header.setTextAlignment(TextAlignment.CENTER);
-      header.setFont(Font.font(50));
-      for(Text t : rankingText) {
-        t.setFont(Font.font(40));
+    final Ranking.Ranker[] rankers = RankingManager.load().toRankerArray();
+    HBox[] content = new HBox[5];
+
+    for(int i = 0; i < 5; ++i) {
+      if(i < rankers.length) {
+        Text nums = new Text(String.format("%2d : %-5d ",i+1, rankers[i].score));
+        nums.setFont(Font.font("Inconsolata",40));
+
+        // Textだと長過ぎる名前で表示が狂うのでLabelを使う
+        // Labelは長過ぎるときに省略してくれる
+        Label name = new Label(rankers[i].name);
+        name.setFont(Font.font(40));
+
+        content[i] = new HBox(nums,name);
+      } else {
+        Text nums = new Text(String.format("%2d :       ",i+1));
+        nums.setFont(Font.font("Inconsolata",40));
+
+        content[i] = new HBox(nums);
       }
-      ranking.getChildren().add(header);
-      ranking.getChildren().addAll(rankingText);
-    } catch (Exception e) {
-      Launcher.abort(e);
     }
+    ranking.getChildren().setAll(content);
   }
 
   @FXML

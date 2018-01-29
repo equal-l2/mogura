@@ -3,7 +3,7 @@
 SRCS = $(wildcard *.java)
 
 all:
-	javac *.java
+	javac *.java -Xdiags:verbose
 clean:
 	rm -f *.class
 

@@ -105,7 +105,7 @@ public class MainController {
     try {
       Scene s = new Scene(loader.load());
       ResultController c = loader.getController();
-      c.prepareRanking(score); // スコアを渡してランキングを表示させる
+      c.setScore(score); // スコアを渡しておく
       FXMLManager.setScene(s);
     } catch (Exception e) {
       Launcher.abort(e);

@@ -3,28 +3,43 @@ import javafx.scene.text.Text;
 
 public class Ranking { // ランキング用オブジェクト
   public static final int numRankers = 5; // ランキングの最大人数
-  private ArrayList<Integer> rankers = new ArrayList<>(); // ランキングを入れるリスト
+  private ArrayList<Ranker> rankers = new ArrayList<>(); // ランキングを入れるリスト
 
-  public Ranking(int[] rankers) {
+  public static class Ranker {
+    public String name;
+    public int score;
+
+    Ranker(String name, int score) {
+      this.name = name;
+      this.score = score;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("%5d\t%s",score,name);
+    }
+  }
+
+  public Ranking(Ranker[] rankers) {
     // 配列が最大人数より長いときは余剰分を切り落とす
     for(int i = 0; i < rankers.length && i < numRankers; ++i) {
       this.rankers.add(rankers[i]);
     }
   }
 
-  public int add(int i) { // ランキングへの追加処理
-    if(rankers.size() < numRankers || rankers.get(rankers.size()-1) <= i) {
+  public int add(Ranker e) { // ランキングへの追加処理
+    if(rankers.size() < numRankers || rankers.get(rankers.size()-1).score <= e.score) {
       // 新スコアの挿入先を探す
       // 同じスコアの場合は新スコアが上に来るようにする
       int pos = rankers.size() - 1;
-      while (pos >= 0 && rankers.get(pos) <= i) {
+      while (pos >= 0 && rankers.get(pos).score <= e.score) {
         --pos;
       };
       ++pos; // 挿入のために調整
       if(pos < 0) { // リストが空のときの調整
         pos = 0;
       }
-      rankers.add(pos,i);
+      rankers.add(pos,e);
 
       if (rankers.size() > numRankers) {
         // 超過分のスコアは削除
@@ -38,22 +53,7 @@ public class Ranking { // ランキング用オブジェクト
     }
   }
 
-  public int[] toIntArray() {
-    // ランキングをint配列で返す
-    return rankers.stream().mapToInt(i -> i).toArray();
-  }
-
-  public Text[] toTextArray() {
-    // ランキングをText配列で返す
-    // スコアが少ない場合も最大人数分を返す
-    Text[] t = new Text[numRankers];
-    for(int i = 0; i < numRankers; ++i) {
-      if(i < rankers.size()) {
-        t[i] = new Text(String.format("%d : %d", i+1, rankers.get(i)));
-      } else {
-        t[i] = new Text(String.format("%d : ", i+1));
-      }
-    }
-    return t;
+  public Ranker[] toRankerArray() {
+    return rankers.stream().toArray(Ranker[]::new);
   }
 }

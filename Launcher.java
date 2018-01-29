@@ -1,6 +1,8 @@
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import javafx.scene.text.Font;
+import java.nio.file.Paths;
 
 public class Launcher extends Application {
   @Override
@@ -9,6 +11,9 @@ public class Launcher extends Application {
     // 読み込み自体は各クラスのstaticコンストラクタで行われる
     new Explosion();
     Enemy.getRandomEnemy();
+
+    // フォント読み込み
+    Font.loadFont(Paths.get("assets/Inconsolata-Regular.ttf").toUri().toURL().toString(),10);
 
     // タイトル画面の表示
     FXMLManager.setStage(stage);
