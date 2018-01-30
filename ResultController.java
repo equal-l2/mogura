@@ -31,9 +31,9 @@ public class ResultController {
 
   public void processRanking() { // 点数に応じてランキングを改変する
     // 一度ランキングに加えてみて、ランクインしているかを調べる
-    Ranking r = RankingManager.load();
+    Ranking r = Ranking.loadFromFile();
     final int pos = r.add(new Ranking.Ranker("",score));
-    r = RankingManager.load();
+    r = Ranking.loadFromFile();
 
     if(pos != -1) { // ランクインしているとき
       final String name = getName(pos);
@@ -45,7 +45,7 @@ public class ResultController {
       ((Text)(tf.getChildren().get(0))).setFill(Color.RED);
       ((Label)(tf.getChildren().get(1))).setTextFill(Color.RED);
 
-      RankingManager.write(r);
+      Ranking.writeToFile(r);
     } else { // ランクインしなかったらランキングの下に点数を出す
       printRanking(r);
 

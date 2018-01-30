@@ -23,7 +23,7 @@ public class TitleController {
   @FXML
   private void initialize() {
     // ランキングを表示する
-    final Ranking.Ranker[] rankers = RankingManager.load().toRankerArray();
+    final Ranking.Ranker[] rankers = Ranking.loadFromFile().toRankerArray();
     HBox[] content = new HBox[5];
 
     for(int i = 0; i < 5; ++i) {
