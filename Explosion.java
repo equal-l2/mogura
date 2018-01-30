@@ -30,7 +30,7 @@ public class Explosion extends ImageView { // 爆発表示クラス
       /* 爆発動画を設定 */
       ObservableList<KeyFrame> kf = tl.getKeyFrames();
       kf.clear();
-      final double frameRate = 12*rate; // フレームレート
+      final double frameRate = 12*2*rate; // フレームレート
       Duration frameTime = Duration.ZERO;
       final Duration frameGap = Duration.millis(1000/frameRate);
       for(final Image i : expImages) {
