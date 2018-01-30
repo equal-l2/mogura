@@ -13,7 +13,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -31,11 +30,11 @@ import javafx.util.Duration;
 
 public class MainController {
   @FXML
-  private Label scoreLabel; // スコア表示用ラベル
+  private Text scoreText; // スコア表示
   @FXML
   private Pane field; // 敵表示用ペイン（「フィールド」）
   @FXML
-  private Label timerLabel; // タイマー表示用ラベル
+  private Text timerText; // タイマー表示
   @FXML
   private Rectangle spBar; // スペシャルタイムの残り時間を示す
 
@@ -76,7 +75,7 @@ public class MainController {
     setSpawnTime(defaultSpawnRate); // スポーン間隔をデフォルトに設定
 
     /* スコア表示設定 */
-    scoreLabel.textProperty().bind(Bindings.createStringBinding(
+    scoreText.textProperty().bind(Bindings.createStringBinding(
       () -> String.format("Score: %d",score.getValue()),
       score
     ));
@@ -88,7 +87,7 @@ public class MainController {
         new KeyFrame(playTime, new KeyValue(seconds, 0))
     );
 
-    timerLabel.textProperty().bind(Bindings.createStringBinding(
+    timerText.textProperty().bind(Bindings.createStringBinding(
       () -> String.format("%02d:%02d", seconds.get()/60, seconds.get()%60),
       seconds
     ));
