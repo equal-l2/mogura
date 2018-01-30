@@ -15,6 +15,8 @@ public class ResultController {
   private VBox ranking;
   private int score;
 
+  private final double rankingFontSize = 50;
+
   @FXML
   private void onReturnButtonAction(ActionEvent e) {
     Launcher.setSceneFromFXML("assets/fxml/Title.fxml");
@@ -50,7 +52,7 @@ public class ResultController {
       printRanking(r);
 
       Text yours = new Text(String.format("Yours : %d", score));
-      yours.setFont(Font.font("Inconsolata",50));
+      yours.setFont(Font.font("Inconsolata",rankingFontSize));
       yours.setFill(Color.BLUE);
 
       ranking.getChildren().addAll(new HBox(), new HBox(yours));
@@ -82,22 +84,22 @@ public class ResultController {
   public void printRanking(Ranking r) {
     // ランキングを表示する
     final Ranking.Ranker[] rankers = r.toRankerArray();
-    HBox[] content = new HBox[5];
+    HBox[] content = new HBox[Ranking.numRankers];
 
-    for(int i = 0; i < 5; ++i) {
+    for(int i = 0; i < Ranking.numRankers; ++i) {
       if(i < rankers.length) {
         Text nums = new Text(String.format("%2d : %-5d ",i+1, rankers[i].score));
-        nums.setFont(Font.font("Inconsolata",50));
+        nums.setFont(Font.font("Inconsolata",rankingFontSize));
 
         // Textだと長過ぎる名前で表示が狂うのでLabelを使う
         // Labelは長過ぎるときに省略してくれる
         Label name = new Label(rankers[i].name);
-        name.setFont(Font.font(50));
+        name.setFont(Font.font(rankingFontSize));
 
         content[i] = new HBox(nums,name);
       } else {
         Text nums = new Text(String.format("%2d :       ",i+1));
-        nums.setFont(Font.font("Inconsolata",50));
+        nums.setFont(Font.font("Inconsolata",rankingFontSize));
 
         content[i] = new HBox(nums);
       }
