@@ -11,6 +11,16 @@ public class TitleController {
   private VBox ranking;
 
   @FXML
+  private void onStartButtonAction(ActionEvent e) {
+    Launcher.setSceneFromFXML("assets/fxml/Main.fxml");
+  }
+
+  @FXML
+  private void onHowToPlayButtonAction(ActionEvent e) {
+    Launcher.setSceneFromFXML("assets/fxml/HowToPlay.fxml");
+  }
+
+  @FXML
   private void initialize() {
     // ランキングを表示する
     final Ranking.Ranker[] rankers = RankingManager.load().toRankerArray();
@@ -35,15 +45,5 @@ public class TitleController {
       }
     }
     ranking.getChildren().setAll(content);
-  }
-
-  @FXML
-  private void onStartButtonAction(ActionEvent e) {
-    FXMLManager.setSceneFromFXML("assets/fxml/Main.fxml");
-  }
-
-  @FXML
-  private void onHowToPlayButtonAction(ActionEvent e) {
-    FXMLManager.setSceneFromFXML("assets/fxml/HowToPlay.fxml");
   }
 }

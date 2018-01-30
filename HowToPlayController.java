@@ -13,6 +13,11 @@ public class HowToPlayController {
   private VBox desc;
 
   @FXML
+  private void onReturnButtonAction(ActionEvent e) {
+    Launcher.setSceneFromFXML("assets/fxml/Title.fxml");
+  }
+
+  @FXML
   private void initialize() {
     ArrayList<TextFlow> ts = new ArrayList<>();
 
@@ -65,10 +70,4 @@ public class HowToPlayController {
     desc.getChildren().addAll(ts);
 
   }
-
-  @FXML
-  private void onReturnButtonAction(ActionEvent e) {
-    FXMLManager.setSceneFromFXML("assets/fxml/Title.fxml");
-  }
-
 }

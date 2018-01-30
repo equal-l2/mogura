@@ -131,12 +131,12 @@ public class MainController {
     spMusic.stop();
 
     // リザルト画面をロード
-    FXMLLoader loader = FXMLManager.getFXMLLoader("assets/fxml/Result.fxml");
+    FXMLLoader loader = Launcher.getFXMLLoader("assets/fxml/Result.fxml");
     try {
       Scene s = new Scene(loader.load());
       ResultController c = loader.getController();
       c.setScore(score.getValue()); // スコアを渡しておく
-      FXMLManager.setScene(s);
+      Launcher.setScene(s);
     } catch (Exception e) {
       Launcher.abort(e);
     }

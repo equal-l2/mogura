@@ -17,7 +17,7 @@ public class ResultController {
 
   @FXML
   private void onReturnButtonAction(ActionEvent e) {
-    FXMLManager.setSceneFromFXML("assets/fxml/Title.fxml");
+    Launcher.setSceneFromFXML("assets/fxml/Title.fxml");
   }
 
   @FXML
