@@ -50,7 +50,7 @@
       <Pane fx:id="field" prefHeight="445.0" prefWidth="600.0" />
       <Pane maxHeight="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="20.0" VBox.vgrow="NEVER">
          <children>
-            <Rectangle fx:id="spBar" arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="20.0" smooth="false" stroke="BLACK" strokeType="INSIDE" width="780.0" />
+            <Rectangle fx:id="spBar" arcHeight="5.0" arcWidth="5.0" fill="YELLOW" height="20.0" stroke="BLACK" strokeType="INSIDE" width="780.0" />
          </children>
          <padding>
             <Insets top="10.0" />
