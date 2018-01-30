@@ -3,11 +3,13 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -15,7 +17,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -36,18 +37,17 @@ public class MainController {
   @FXML
   private Label timerLabel; // タイマー表示用ラベル
   @FXML
-  private Rectangle specialBar;
+  private Rectangle spBar; // スペシャルタイムの残り時間を示す
 
-  private static final Duration defaultSpawnRate = Duration.millis(800); // デフォルトのスポーン間隔
-  private static final Duration specialSpawnRate = Duration.millis(400); // スペシャルタイムのスポーン間隔
-  private static final Duration playTime = Duration.seconds(10); // プレイ時間
+  private static final Duration defaultSpawnRate = Duration.millis(1000); // デフォルトのスポーン間隔
+  private static final Duration specialSpawnRate = Duration.millis(500); // スペシャルタイムのスポーン間隔
+  private static final Duration playTime = Duration.seconds(60); // プレイ時間
 
-  private int score = 0; // スコア
-  private boolean stateSpecial = false; // スペシャル状態かを示すブーリアン
+  private boolean stateSpecial = false; // スペシャル状態かを示す
 
   private final Timeline spawner = new Timeline(); // 敵表示用
 
-  private final MediaPlayer specialMusic = new MediaPlayer( // スペシャル状態用音楽
+  private final MediaPlayer spMusic = new MediaPlayer( // スペシャル状態用音楽
     new Media(Paths.get("assets/sounds/special.wav").toUri().toString())
   );
 
@@ -59,34 +59,65 @@ public class MainController {
 
   private final Image cross = new Image("assets/cross.png"); // 触れてはいけない敵をクリックした時の画像
 
-  private final CountDownTimer playTimer = new CountDownTimer(playTime);
-  private CountDownTimer specialTimer;
+  private final Timeline playTimer = new Timeline(); // プレイ時間タイマ
+  private final Timeline spTimer = new Timeline(); // spBarの長さを変化させる
 
-  private double maxBarWidth;
+  private final SimpleIntegerProperty seconds = new SimpleIntegerProperty(); // 残りプレイ時間
+  private final SimpleIntegerProperty score = new SimpleIntegerProperty(0); // スコア
+
+  private double barWidth; // spBarの元の長さ
 
   @FXML
   private void initialize() {
     /* 各種設定 */
-    specialMusic.setCycleCount(1);
-    specialMusic.setVolume(0.2);
-    spawner.setCycleCount(Animation.INDEFINITE);
-    setSpawnTime(defaultSpawnRate);
-    playTimer.setOnTimeUp(() -> proceedToResult());
-    timerLabel.textProperty().bind(Bindings.createStringBinding(
-      () -> String.format("%02d:%02d", (int) playTimer.getTime().toMinutes(), (int) playTimer.getTime().toSeconds()),
-      playTimer.millisProperty()
-    ));
-    updateScore();
+    spMusic.setCycleCount(1); // 音楽のループ回数
+    spMusic.setVolume(0.2); // 音楽の音量
+    spawner.setCycleCount(Animation.INDEFINITE); // スポナーは繰り返し動作させる
+    setSpawnTime(defaultSpawnRate); // スポーン間隔をデフォルトに設定
 
-    specialMusic.setOnEndOfMedia(() -> {
-      // 音楽がループし終わったらスペシャル状態を抜ける
-      if (specialMusic.getCurrentCount() == specialMusic.getCycleCount()) {
-        specialMusic.seek(Duration.ZERO);
-        specialMusic.stop(); // 停止しないと再生状態がリセットされない
-        setSpawnTime(defaultSpawnRate);
-        stateSpecial = false;
-      }
+    /* スコア表示設定 */
+    scoreLabel.textProperty().bind(Bindings.createStringBinding(
+      () -> String.format("Score: %d",score.getValue()),
+      score
+    ));
+
+    /* プレイ時間タイマの設定 */
+    playTimer.setOnFinished((ActionEvent) -> proceedToResult());
+    playTimer.getKeyFrames().setAll(
+        new KeyFrame(Duration.ZERO, new KeyValue(seconds, (int) playTime.toSeconds())),
+        new KeyFrame(playTime, new KeyValue(seconds, 0))
+    );
+
+    timerLabel.textProperty().bind(Bindings.createStringBinding(
+      () -> String.format("%02d:%02d", seconds.get()/60, seconds.get()%60),
+      seconds
+    ));
+
+    /* spTimerの設定 */
+    // スペシャル時間の終了処理をspTimerにやってもらう
+    spTimer.setOnFinished((ActionEvent) -> {
+      /* + Ritual + */
+      spMusic.pause();
+      spMusic.seek(Duration.ZERO);
+      /* これがないとたまに音楽が再生されない */
+
+      spMusic.stop(); // 停止しないと再生状態がリセットされない
+      setSpawnTime(defaultSpawnRate);
+      stateSpecial = false;
     });
+
+    // spMusicがREADYになったらspTimerを設定してもらう
+    // READYになる前はgetTotalDurationはUNKNOWNを返す
+    spMusic.setOnReady(() ->
+      spTimer.getKeyFrames().setAll(
+        new KeyFrame(Duration.ZERO, new KeyValue(spBar.widthProperty(), barWidth)),
+        new KeyFrame(spMusic.getTotalDuration(), new KeyValue(spBar.widthProperty(),0))
+      )
+    );
+
+    // spBarの準備
+    barWidth = spBar.getWidth(); // 元の長さを記録
+    spBar.setWidth(0); // 長さを0に設定
 
     /* Timeline開始 */
     playTimer.play();
@@ -97,15 +128,15 @@ public class MainController {
     // タイムライン等は止めないと止まらないので止める
     spawner.stop();
     playTimer.stop();
-    if(specialTimer != null) specialTimer.stop();
-    specialMusic.stop();
+    spTimer.stop();
+    spMusic.stop();
 
     // リザルト画面をロード
     FXMLLoader loader = FXMLManager.getFXMLLoader("assets/fxml/Result.fxml");
     try {
       Scene s = new Scene(loader.load());
       ResultController c = loader.getController();
-      c.setScore(score); // スコアを渡しておく
+      c.setScore(score.getValue()); // スコアを渡しておく
       FXMLManager.setScene(s);
     } catch (Exception e) {
       Launcher.abort(e);
@@ -127,10 +158,6 @@ public class MainController {
     if(stateSpecial) return;
     stateSpecial = true;
 
-    // スペシャル時間表示バーの最大幅を設定
-    final VBox parent = (VBox) specialBar.getParent().getParent();
-    maxBarWidth = parent.getWidth()-parent.getPadding().getLeft()-parent.getPadding().getRight();
-
     /* フィールド上の敵を全爆破 */
     EnemyView[] eList = getEnemyViewsOnField();
     for(EnemyView e : eList) {
@@ -141,13 +168,8 @@ public class MainController {
 
     setSpawnTime(specialSpawnRate); // スポーン間隔を早める
 
-    specialTimer = new CountDownTimer(specialMusic.getTotalDuration());
-    specialTimer.setOnTick( () -> {
-      setBar(specialTimer.getTime());
-    });
-
-    specialTimer.play();
-    specialMusic.play();
+    spTimer.play();
+    spMusic.play();
   }
 
   private void setSpawnTime(Duration d) { // スポーン間隔を変更する
@@ -157,22 +179,7 @@ public class MainController {
   }
 
   private void addScore(int i) {
-    score += i;
-    updateScore();
-  }
-
-  private void updateScore() {
-    scoreLabel.setText(String.format("Score: %d",score));
-  }
-
-  private void setBar(Duration d) {
-    if(!stateSpecial) {
-      specialBar.setWidth(0.0);
-    } else {
-      final Duration totalTime = specialMusic.getTotalDuration();
-      final Duration remainingTime = d;
-      specialBar.setWidth((remainingTime.toMillis()/totalTime.toMillis())*maxBarWidth);
-    }
+    score.set(score.getValue() + i);
   }
 
   private void destroyEnemy(EnemyView e) { // 敵破壊時の処理
