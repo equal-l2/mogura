@@ -16,6 +16,7 @@ public class RankingManager { // ランキングとファイルの間を取り�
         // ので新規生成する
         Files.createFile(filePath);
       }
+      // ランカーの名前はBase64で保存されているのでデコードする
       Base64.Decoder dec = Base64.getDecoder();
       Ranking.Ranker[] rankers = Files.lines(filePath)
         .map(s -> s.split(" "))
@@ -34,7 +35,9 @@ public class RankingManager { // ランキングとファイルの間を取り�
     // (そのまま保存するとスペース周りの扱いがめんどいので)
     Base64.Encoder enc = Base64.getEncoder();
     try (PrintWriter pw = new PrintWriter(Files.newBufferedWriter(filePath))){
-      Arrays.stream(r.toRankerArray()).map(e -> String.format("%s %d", enc.encodeToString(e.name.getBytes()), e.score)).forEach(pw::println);
+      Arrays.stream(r.toRankerArray())
+        .map(e -> String.format("%s %d", enc.encodeToString(e.name.getBytes()), e.score))
+        .forEach(pw::println);
     } catch (Exception e) {
       Launcher.abort(e);
     }
