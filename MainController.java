@@ -13,6 +13,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -193,7 +194,10 @@ public class MainController {
 
   private void destroySpecial(EnemyView e) { // スペシャル敵破壊時の処理
     Explosion expl = new Explosion();
+    ColorAdjust c = new ColorAdjust();
+    c.setHue(-0.5); // 色相を調整(赤->紫)
     expl.setRate(2.0);
+    expl.setEffect(c);
     destroyCommons(e, expl, e.enemy.score);
     expl.setOnFinished(ActionEvent -> {
       field.getChildren().remove(expl);
