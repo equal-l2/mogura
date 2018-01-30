@@ -81,7 +81,7 @@ public class MainController {
     ));
 
     /* プレイ時間タイマの設定 */
-    playTimer.setOnFinished((ActionEvent) -> proceedToResult());
+    playTimer.setOnFinished((ActionEvent) -> returnToTitle());
     playTimer.getKeyFrames().setAll(
         new KeyFrame(Duration.ZERO, new KeyValue(seconds, (int) playTime.toSeconds())),
         new KeyFrame(playTime, new KeyValue(seconds, 0))
@@ -123,7 +123,7 @@ public class MainController {
     spawner.play();
   }
 
-  private void proceedToResult() { // リザルト画面へ進む
+  private void returnToTitle() { // タイトル画面へ戻る
     // タイムライン等は止めないと止まらないので止める
     spawner.stop();
     playTimer.stop();
@@ -131,10 +131,10 @@ public class MainController {
     spMusic.stop();
 
     // リザルト画面をロード
-    FXMLLoader loader = Launcher.getFXMLLoader("assets/fxml/Result.fxml");
+    FXMLLoader loader = Launcher.getFXMLLoader("assets/fxml/Title.fxml");
     try {
       Scene s = new Scene(loader.load());
-      ResultController c = loader.getController();
+      TitleController c = loader.getController();
       c.setScore(score.getValue()); // スコアを渡しておく
       Launcher.setScene(s);
     } catch (Exception e) {
