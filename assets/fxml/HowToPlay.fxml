@@ -2,19 +2,42 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" spacing="20.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HowToPlayController">
+
+<GridPane alignment="CENTER" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HowToPlayController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints fillHeight="false" minHeight="10.0" vgrow="SOMETIMES" />
+      <RowConstraints vgrow="NEVER" />
+   </rowConstraints>
    <children>
-      <VBox fx:id="desc" spacing="30.0" />
-      <Button mnemonicParsing="false" onAction="#onReturnButtonAction" text="Return to Title">
-         <font>
-            <Font size="30.0" />
-         </font>
-      </Button>
+      <VBox fx:id="desc" spacing="30.0">
+         <GridPane.margin>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </GridPane.margin>
+      </VBox>
+      <HBox alignment="CENTER" GridPane.rowIndex="1">
+         <children>
+            <Button mnemonicParsing="false" onAction="#onReturnButtonAction" text="Return to Title">
+               <font>
+                  <Font size="30.0" />
+               </font>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </Button>
+         </children>
+         <GridPane.margin>
+            <Insets bottom="20.0" top="20.0" />
+         </GridPane.margin>
+      </HBox>
    </children>
-   <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-   </padding>
-</VBox>
+</GridPane>

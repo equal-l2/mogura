@@ -1,21 +1,17 @@
 import java.util.Optional;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class ResultController {
   @FXML
-  private VBox ranking;
-  private int score;
+  Pane rankingPane;
 
-  private final double rankingFontSize = 50;
+  private int score;
 
   @FXML
   private void onReturnButtonAction(ActionEvent e) {
@@ -31,38 +27,40 @@ public class ResultController {
     this.score = score;
   }
 
-  public void processRanking() { // 点数に応じてランキングを改変する
+  public void processRanking() { // ランキング表示
+    final double fontSize = 50;
+
     // 一度ランキングに加えてみて、ランクインしているかを調べる
     Ranking r = Ranking.loadFromFile();
-    final int pos = r.add(new Ranking.Ranker("",score));
+    final int pos = r.add(new Ranking.Ranker("", score));
     r = Ranking.loadFromFile();
 
+    RankingDisplay disp;
     if(pos != -1) { // ランクインしているとき
       final String name = getName(pos);
       r.add(new Ranking.Ranker(name, score));
-      printRanking(r);
+      disp = new RankingDisplay(r, fontSize);
 
       // 追加したスコアを色付けする
-      HBox tf = (HBox) ranking.getChildren().get(pos);
-      ((Text)(tf.getChildren().get(0))).setFill(Color.RED);
-      ((Label)(tf.getChildren().get(1))).setTextFill(Color.RED);
+      RankingDisplay.Element e = (RankingDisplay.Element) disp.getChildren().get(pos);
+      e.setFill(Color.RED);
 
       Ranking.writeToFile(r);
     } else { // ランクインしなかったらランキングの下に点数を出す
-      printRanking(r);
+      disp = new RankingDisplay(r, fontSize);
 
       Text yours = new Text(String.format("Yours : %d", score));
-      yours.setFont(Font.font("Inconsolata",rankingFontSize));
+      yours.setFont(Font.font("Inconsolata", fontSize));
       yours.setFill(Color.BLUE);
-
-      ranking.getChildren().addAll(new HBox(), new HBox(yours));
+      disp.getChildren().add(yours);
     }
+    rankingPane.getChildren().add(disp);
   }
 
   public String getName(int pos) {
     // ダイアログを出して名前を聞く
     TextInputDialog d = new TextInputDialog();
-    d.setHeaderText(String.format("%d位おめでとう！",pos+1));
+    d.setHeaderText(String.format("%d位おめでとう！", pos+1));
     d.setContentText("名前を入力してください");
     d.setGraphic(null);
 
@@ -79,31 +77,5 @@ public class ResultController {
     } else {
       return "No Name";
     }
-  }
-
-  public void printRanking(Ranking r) {
-    // ランキングを表示する
-    final Ranking.Ranker[] rankers = r.toRankerArray();
-    HBox[] content = new HBox[Ranking.numRankers];
-
-    for(int i = 0; i < Ranking.numRankers; ++i) {
-      if(i < rankers.length) {
-        Text nums = new Text(String.format("%2d : %-5d ",i+1, rankers[i].score));
-        nums.setFont(Font.font("Inconsolata",rankingFontSize));
-
-        // Textだと長過ぎる名前で表示が狂うのでLabelを使う
-        // Labelは長過ぎるときに省略してくれる
-        Label name = new Label(rankers[i].name);
-        name.setFont(Font.font(rankingFontSize));
-
-        content[i] = new HBox(nums,name);
-      } else {
-        Text nums = new Text(String.format("%2d :       ",i+1));
-        nums.setFont(Font.font("Inconsolata",rankingFontSize));
-
-        content[i] = new HBox(nums);
-      }
-    }
-    ranking.getChildren().setAll(content);
   }
 }
