@@ -240,7 +240,7 @@ public class MainController {
     t.relocate(enemy.getLayoutX(),enemy.getLayoutY()); // 点数の位置を敵に合わせる
 
     PathTransition move = new PathTransition( // 点数は表示後上に移動していく
-      Duration.millis(1000),
+      Duration.millis(500),
       new Path(new MoveTo(0.0,0.0), new LineTo(0.0,-50.0)),
       t
     );
