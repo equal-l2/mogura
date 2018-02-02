@@ -20,6 +20,7 @@ public class Launcher extends Application {
     Font.loadFont(Paths.get("assets/Inconsolata-Regular.ttf").toUri().toURL().toString(),10);
 
     // タイトル画面の表示
+    stage.setResizable(false);
     Launcher.stage = stage;
     setSceneFromFXML("assets/fxml/Title.fxml");
   }
