@@ -20,6 +20,7 @@ public class ResultController {
 
   @FXML
   private void initialize() {
+    // ランキング処理内でノードにアクセスするので初期化後まで遅延させる
     javafx.application.Platform.runLater(() -> processRanking());
   }
 
@@ -64,7 +65,7 @@ public class ResultController {
     d.setContentText("名前を入力してください");
     d.setGraphic(null);
 
-    // 名前をもらって、空白なら"No Name"を
+    // 名前を受け取り、空白なら"No Name"を
     // さもなくばその名前を返す
     Optional<String> result = d.showAndWait();
     if (result.isPresent()) {
