@@ -1,7 +1,6 @@
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.ParallelTransition;
@@ -13,6 +12,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -27,7 +27,6 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import javafx.scene.control.ProgressBar;
 
 public class MainController {
   @FXML
@@ -70,7 +69,7 @@ public class MainController {
     /* 各種設定 */
     spMusic.setCycleCount(1); // 音楽のループ回数
     spMusic.setVolume(0.2); // 音楽の音量
-    spawner.setCycleCount(Animation.INDEFINITE); // スポナーは繰り返し動作させる
+    spawner.setCycleCount(Timeline.INDEFINITE); // スポナーは繰り返し動作させる
     setSpawnTime(defaultSpawnRate); // スポーン間隔をデフォルトに設定
 
     /* スコア表示設定 */
