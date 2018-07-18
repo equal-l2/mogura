@@ -11,20 +11,24 @@ public class ResultController {
   @FXML
   Pane rankingPane;
 
-  private int score;
+  private int score; // 今回のプレイのスコア
 
   @FXML
   private void onReturnButtonAction(ActionEvent e) {
+    // タイトルに戻る
     Launcher.setSceneFromFXML("assets/fxml/Title.fxml");
   }
 
   @FXML
   private void initialize() {
     // ランキング処理内でノードにアクセスするので初期化後まで遅延させる
+    // (初期化前はノードがnullなのでアクセスできない)
     javafx.application.Platform.runLater(() -> processRanking());
   }
 
   public void setScore(int score) {
+    // 外部からスコアを設定するためのメソッド
+    // (MainControllerからプレイの結果を受け取る)
     this.score = score;
   }
 

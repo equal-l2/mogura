@@ -1,3 +1,4 @@
+import java.io.BufferedWriter;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,7 +90,10 @@ public class Ranking { // ランキング
     // ランカーの名前はBase64で変換して保存する
     // (そのまま保存するとスペース周りの扱いが面倒なので)
     Base64.Encoder enc = Base64.getEncoder();
-    try (PrintWriter pw = new PrintWriter(Files.newBufferedWriter(filePath))){
+    try (
+        BufferedWriter bw = Files.newBufferedWriter(filePath);
+        PrintWriter pw = new PrintWriter(bw)
+    ){
       Arrays.stream(r.toRankerArray())
         .map(e -> String.format("%s %d", enc.encodeToString(e.name.getBytes()), e.score))
         .forEach(pw::println);

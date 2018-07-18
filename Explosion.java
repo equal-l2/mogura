@@ -11,6 +11,10 @@ import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
 
 public class Explosion extends ImageView { // 爆発表示クラス
+  // 動画を透過表示する方法が見つからないので
+  // 各フレームを画像として保持・切り替えることで動画を実現する
+  // CPU負荷が大きいのが悩みどころ
+
   static final private Image[] expImages = IntStream // 爆発動画のフレーム
     .rangeClosed(1,56)
     .mapToObj(i -> String.format("assets/exp/%02d.png",i))

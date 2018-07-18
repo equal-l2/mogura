@@ -194,9 +194,9 @@ public class MainController {
 
   private void destroySpecial(EnemyView e) { // スペシャル敵破壊時の処理
     Explosion expl = new Explosion();
+    expl.setRate(2.0); // 2倍速にする
     ColorAdjust c = new ColorAdjust();
     c.setHue(-0.5); // 色相を調整(赤->紫)
-    expl.setRate(2.0);
     expl.setEffect(c);
     destroyCommons(e, expl, e.enemy.score);
     expl.setOnFinished(ActionEvent -> {
@@ -208,7 +208,7 @@ public class MainController {
   }
 
   private void destroyDonttouch(EnemyView e) { // 触ってはいけない敵破壊時の処理
-    ImageView crossView = new ImageView(cross);
+    ImageView crossView = new ImageView(cross); // バツ印
     destroyCommons(e, crossView,-10*e.enemy.score);
     PauseTransition t = new PauseTransition(Duration.millis(1680));
     t.setOnFinished(ActionEvent -> {
@@ -256,13 +256,13 @@ public class MainController {
 
   private Enemy getEnemy() {
     // ランダムな敵を返す
-    // ただし過去5回の敵とかぶらないようにする*/
+    final int historyLength = 3; // 敵の出現履歴を覚える個数
     Enemy e;
     do {
       e = Enemy.getRandomEnemy();
     } while (enemyHistory.contains(e));
 
-    if (enemyHistory.size() >= 5) {
+    if (enemyHistory.size() >= historyLength) {
       enemyHistory.remove();
     }
     enemyHistory.add(e);

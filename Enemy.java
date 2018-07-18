@@ -17,8 +17,8 @@ public class Enemy extends Image { // 敵クラス
   static {
     // 設定ファイルを読み込み
     ArrayList<Enemy> eList = new ArrayList<>();
-    try (BufferedReader br = Files
-        .newBufferedReader(Paths.get("assets/enemies.conf"))
+    try (
+        BufferedReader br = Files.newBufferedReader(Paths.get("assets/enemies.conf"))
     ) {
       String line;
       while ((line = br.readLine()) != null) {
