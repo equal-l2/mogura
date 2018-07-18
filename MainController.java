@@ -24,10 +24,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import javafx.scene.control.ProgressBar;
 
 public class MainController {
   @FXML
@@ -37,7 +37,7 @@ public class MainController {
   @FXML
   private Text timerText; // タイマー表示
   @FXML
-  private Rectangle spBar; // スペシャルタイムの残り時間を示す
+  private ProgressBar spBar; // スペシャルタイムの残り時間を示す
 
   private static final Duration defaultSpawnRate = Duration.millis(1000); // デフォルトのスポーン間隔
   private static final Duration specialSpawnRate = Duration.millis(500); // スペシャルタイムのスポーン間隔
@@ -64,8 +64,6 @@ public class MainController {
 
   private final SimpleIntegerProperty seconds = new SimpleIntegerProperty(); // 残りプレイ時間
   private final SimpleIntegerProperty score = new SimpleIntegerProperty(0); // スコア
-
-  private double barWidth; // spBarの元の長さ
 
   @FXML
   private void initialize() {
@@ -94,30 +92,16 @@ public class MainController {
     ));
 
     /* spTimerの設定 */
-    // スペシャル時間の終了処理をspTimerにやってもらう
-    spTimer.setOnFinished((ActionEvent) -> {
-      /* + Ritual + */
-      spMusic.pause();
-      spMusic.seek(Duration.ZERO);
-      /* これがないとたまに音楽が再生されない */
-
-      spMusic.stop(); // 停止しないと再生状態がリセットされない
-      setSpawnTime(defaultSpawnRate);
-      stateSpecial = false;
-    });
+    spTimer.setOnFinished((ActionEvent) -> disableSpecial());
 
     // spMusicがREADYになったらspTimerを設定してもらう
     // READYになる前はgetTotalDurationはUNKNOWNを返す
     spMusic.setOnReady(() ->
       spTimer.getKeyFrames().setAll(
-        new KeyFrame(Duration.ZERO, new KeyValue(spBar.widthProperty(), barWidth)),
-        new KeyFrame(spMusic.getTotalDuration(), new KeyValue(spBar.widthProperty(),0))
+        new KeyFrame(Duration.ZERO, new KeyValue(spBar.progressProperty(), 1)),
+        new KeyFrame(spMusic.getTotalDuration(), new KeyValue(spBar.progressProperty(),0))
       )
     );
-
-    // spBarの準備
-    barWidth = spBar.getWidth(); // 元の長さを記録
-    spBar.setWidth(0); // 長さを0に設定
 
     /* Timeline開始 */
     playTimer.play();
@@ -136,7 +120,7 @@ public class MainController {
     try {
       Scene s = new Scene(loader.load());
       ResultController c = loader.getController();
-      c.setScore(score.getValue()); // スコアを渡しておく
+      c.setScore(score.getValue()); // スコアをResultControllerに渡しておく
       Launcher.setScene(s);
     } catch (Exception e) {
       Launcher.abort(e);
@@ -146,16 +130,15 @@ public class MainController {
   private EnemyView[] getEnemyViewsOnField() {
     // フィールド上の敵を配列に入れて返す
     return field.getChildren()
-      .filtered(node -> {
+      .filtered((node) -> {
         return node instanceof EnemyView;
       })
       .stream()
-      .map(e -> (EnemyView)e)
+      .map((e) -> (EnemyView)e)
       .toArray(EnemyView[]::new);
   }
 
   private void enableSpecial() { // スペシャル状態に入る
-    if(stateSpecial) return;
     stateSpecial = true;
 
     /* フィールド上の敵を全爆破 */
@@ -168,13 +151,27 @@ public class MainController {
 
     setSpawnTime(specialSpawnRate); // スポーン間隔を早める
 
+    spBar.setVisible(true); // spBarを表示する
     spTimer.play();
     spMusic.play();
   }
 
+  private void disableSpecial() { // スペシャル状態を抜ける
+    stateSpecial = false;
+
+    /* + Ritual + */
+    spMusic.pause();
+    spMusic.seek(Duration.ZERO);
+    /* これがないとたまに音楽が再生されない */
+
+    spMusic.stop(); // 停止しないと再生状態がリセットされない
+    setSpawnTime(defaultSpawnRate);
+    spBar.setVisible(false);
+  }
+
   private void setSpawnTime(Duration d) { // スポーン間隔を変更する
     spawner.stop();
-    spawner.getKeyFrames().setAll(new KeyFrame(d, ActionEvent -> spawnEnemy()));
+    spawner.getKeyFrames().setAll(new KeyFrame(d, (ActionEvent) -> spawnEnemy()));
     spawner.play();
   }
 
@@ -185,7 +182,7 @@ public class MainController {
   private void destroyEnemy(EnemyView e) { // 敵破壊時の処理
     Explosion expl = new Explosion();
     destroyCommons(e, expl, e.enemy.score);
-    expl.setOnFinished(ActionEvent -> {
+    expl.setOnFinished((ActionEvent) -> {
       field.getChildren().remove(expl);
       field.getChildren().remove(e);
     });
@@ -199,19 +196,22 @@ public class MainController {
     c.setHue(-0.5); // 色相を調整(赤->紫)
     expl.setEffect(c);
     destroyCommons(e, expl, e.enemy.score);
-    expl.setOnFinished(ActionEvent -> {
+    expl.setOnFinished((ActionEvent) -> {
       field.getChildren().remove(expl);
       field.getChildren().remove(e);
     });
     expl.play();
-    enableSpecial();
+
+    if (!stateSpecial) {
+      enableSpecial();
+    }
   }
 
   private void destroyDonttouch(EnemyView e) { // 触ってはいけない敵破壊時の処理
     ImageView crossView = new ImageView(cross); // バツ印
     destroyCommons(e, crossView,-10*e.enemy.score);
     PauseTransition t = new PauseTransition(Duration.millis(1680));
-    t.setOnFinished(ActionEvent -> {
+    t.setOnFinished((ActionEvent) -> {
       field.getChildren().remove(e);
       field.getChildren().remove(crossView);
     });
@@ -283,24 +283,24 @@ public class MainController {
     } while (
       i < 100 &&
       Arrays.stream(getEnemyViewsOnField())
-      .anyMatch(eOnField -> eOnField.collideWith(eView))
+      .anyMatch((eOnField) -> eOnField.collideWith(eView))
     );
   }
 
   private void setHandler(EnemyView eView) {
     // 敵の種類によって適切な処理を指定
     if (stateSpecial) {
-      eView.setOnMouseEntered(MouseEvent -> destroyEnemy(eView) );
+      eView.setOnMouseEntered((MouseEvent) -> destroyEnemy(eView) );
     } else {
       switch (eView.enemy.type) {
         case ENEMY:
-          eView.setOnMouseClicked(MouseEvent -> destroyEnemy(eView));
+          eView.setOnMouseClicked((MouseEvent) -> destroyEnemy(eView));
           break;
         case SPECIAL:
-          eView.setOnMouseClicked(MouseEvent -> destroySpecial(eView));
+          eView.setOnMouseClicked((MouseEvent) -> destroySpecial(eView));
           break;
         case DONTTOUCH:
-          eView.setOnMouseClicked(MouseEvent -> destroyDonttouch(eView));
+          eView.setOnMouseClicked((MouseEvent) -> destroyDonttouch(eView));
           break;
       };
     }
@@ -326,7 +326,7 @@ public class MainController {
       eView
     );
 
-    trans.setOnFinished(ActionEvent -> {
+    trans.setOnFinished((ActionEvent) -> {
       // フェードアウトしたらフィールドから削除する
       field.getChildren().remove(eView);
     });
