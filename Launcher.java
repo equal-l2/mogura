@@ -17,7 +17,7 @@ public class Launcher extends Application {
     Enemy.getRandomEnemy();
 
     // フォント読み込み
-    Font.loadFont(Paths.get("assets/Inconsolata-Regular.ttf").toUri().toURL().toString(),10);
+    Font.loadFont("assets/Inconsolata-Regular.ttf",10);
 
     // タイトル画面の表示
     stage.setResizable(false);
@@ -37,7 +37,11 @@ public class Launcher extends Application {
 
   public static void setSceneFromFXML(String name) {
     // FXMLを読み込んでSceneを切り替える
-    setScene(getSceneFromFXML(name));
+    try {
+      setScene(new Scene(getFXMLLoader(name).load()));
+    } catch (Exception e) {
+      Launcher.abort(e);
+    }
   }
 
   public static void setScene(Scene s) {
@@ -46,21 +50,16 @@ public class Launcher extends Application {
     stage.show();
   }
 
-  public static Scene getSceneFromFXML(String name) {
-    // FXMLからSceneを生成する
-    try {
-      return new Scene(FXMLLoader.load(Paths.get(name).toUri().toURL()));
-    } catch (Exception e) {
-      Launcher.abort(e);
-    }
-    return null;
+  public static Scene getCurrentScene() {
+    // 現在のSceneをgetする
+    // Sceneにイベントを付けたい時に使う
+    return stage.getScene();
   }
 
   public static FXMLLoader getFXMLLoader(String name) {
     // FXMLからFXMLLoaderを生成する
-    // 外部からコントローラにアクセスするにはこれを使うしかない
     try {
-      return new FXMLLoader(Paths.get(name).toUri().toURL());
+      return new FXMLLoader(Launcher.class.getResource(name));
     } catch (Exception e) {
       Launcher.abort(e);
     }

@@ -1,4 +1,3 @@
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import javafx.animation.KeyFrame;
@@ -46,14 +45,17 @@ public class MainController {
 
   private final Timeline spawner = new Timeline(); // 敵表示用
 
-  private final MediaPlayer spMusic = new MediaPlayer( // スペシャル状態用音楽
-    new Media(Paths.get("assets/sounds/special.wav").toUri().toString())
-  );
+  // スペシャル状態用音楽
+  private final MediaPlayer spMusic = new MediaPlayer(new Media(
+    getClass().getResource("assets/sounds/special.wav").toString()
+  ));
 
-  private final LinkedList<Enemy> enemyHistory = new LinkedList<>(); // 過去にスポーンした敵を記録するキュー
+  // 過去にスポーンした敵を記録するキュー
+  private final LinkedList<Enemy> enemyHistory = new LinkedList<>();
 
-  private final AudioClip donttouchSound = new AudioClip( // 触れてはいけない敵をクリックしたときの音
-    Paths.get("assets/sounds/bubbu.wav").toUri().toString()
+  // 触れてはいけない敵をクリックしたときの音
+  private final AudioClip donttouchSound = new AudioClip(
+    getClass().getResource("assets/sounds/bubbu.wav").toString()
   );
 
   private final Image cross = new Image("assets/cross.png"); // 触れてはいけない敵をクリックした時の画像
