@@ -68,6 +68,7 @@ public class MainController {
 
   @FXML
   private void initialize() {
+    // TODO: 敵スポーンを別クラスに切り出す?
     /* 各種設定 */
     spMusic.setCycleCount(1); // 音楽のループ回数
     spMusic.setVolume(0.2); // 音楽の音量
@@ -246,34 +247,44 @@ public class MainController {
       t
     );
 
+    // 点数のフェードイン・アウト
     FadeInOut trans = new FadeInOut(Duration.ZERO, Duration.millis(1200), Duration.millis(500), t);
+    // 点数はフェードアウト後削除する
     trans.setOnFinished((ActionEvent) -> field.getChildren().remove(t));
+    // フェードイン・アウトと上への移動を同時に行う
     ParallelTransition p = new ParallelTransition(trans.toTransition(), move);
 
     field.getChildren().add(effect); // フィールドにエフェクトを表示
     field.getChildren().add(t); // フィールドに点数を表示
-    p.play();
+
+    p.play(); // 点数エフェクトを開始
   }
 
   private Enemy getEnemy() {
     // ランダムな敵を返す
+    // ただし過去の出現履歴を覚えておいて出現敵が被らないようにする
+
     final int historyLength = 3; // 敵の出現履歴を覚える個数
     Enemy e;
+
+    // 出現履歴と被らなくなるまで新たな敵を生成する
     do {
       e = Enemy.getRandomEnemy();
     } while (enemyHistory.contains(e));
 
+    // 出現履歴のリストの長さを保つ
     if (enemyHistory.size() >= historyLength) {
       enemyHistory.remove();
     }
     enemyHistory.add(e);
+
     return e;
   }
 
   private void relocateEnemy(EnemyView eView) {
     // 敵をランダムな位置へ移動
     // フィールド上の敵と位置が被ったら配置し直す
-    // フィールドが埋まっていて適切な位置が見つからなければあきらめる
+    // 適当な回数やっても適切な位置が見つからなければあきらめてその位置に配置する
     int i = 0;
     do {
       eView.relocate(
@@ -289,18 +300,20 @@ public class MainController {
   }
 
   private void setHandler(EnemyView eView) {
-    // 敵の種類によって適切な処理を指定
+    // 敵の種類によって適切なマウスハンドラを指定する
+
     if (stateSpecial) {
+      // スペシャル状態では全敵が破壊可能になる
       eView.setOnMouseEntered((MouseEvent) -> destroyEnemy(eView) );
     } else {
       switch (eView.enemy.type) {
-        case ENEMY:
+        case ENEMY:     // 通常敵
           eView.setOnMouseClicked((MouseEvent) -> destroyEnemy(eView));
           break;
-        case SPECIAL:
+        case SPECIAL:   // スペシャル敵
           eView.setOnMouseClicked((MouseEvent) -> destroySpecial(eView));
           break;
-        case DONTTOUCH:
+        case DONTTOUCH: // 触ってはいけない敵
           eView.setOnMouseClicked((MouseEvent) -> destroyDonttouch(eView));
           break;
       };

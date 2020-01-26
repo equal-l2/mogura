@@ -29,6 +29,7 @@ public class Ranking { // ランキング
 
   public Ranking(Ranker[] rankers) {
     // 配列が最大人数より長いときは余剰分を切り落とす
+    // TODO: streamで書けないか?
     for(int i = 0; i < rankers.length && i < numRankers; ++i) {
       this.rankers.add(rankers[i]);
     }

@@ -45,6 +45,7 @@ public class RankingDisplay extends VBox { // ランキング表示
     final Ranking.Ranker[] rankers = r.toRankerArray();
 
     for(int i = 0; i < Ranking.numRankers; ++i) {
+      // その順位に人がいるときのみ名前を表示するようにする
       if(i < rankers.length) {
         getChildren().add(new Element(i+1, fontSize, rankers[i]));
       } else {
