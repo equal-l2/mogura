@@ -47,7 +47,7 @@ public class MainController {
 
   // スペシャル状態用音楽
   private final MediaPlayer spMusic = new MediaPlayer(new Media(
-    getClass().getResource("assets/sounds/special.wav").toString()
+    Launcher.toUriString("assets/sounds/special.wav")
   ));
 
   // 過去にスポーンした敵を記録するキュー
@@ -55,10 +55,10 @@ public class MainController {
 
   // 触れてはいけない敵をクリックしたときの音
   private final AudioClip donttouchSound = new AudioClip(
-    getClass().getResource("assets/sounds/bubbu.wav").toString()
+    Launcher.toUriString("assets/sounds/bubbu.wav")
   );
 
-  private final Image cross = new Image("assets/cross.png"); // 触れてはいけない敵をクリックした時の画像
+  private final Image cross = new Image(Launcher.toUriString("assets/cross.png")); // 触れてはいけない敵をクリックした時の画像
 
   private final Timeline playTimer = new Timeline(); // プレイ時間タイマ
   private final Timeline spTimer = new Timeline(); // spBarの長さを変化させる

@@ -59,10 +59,14 @@ public class Launcher extends Application {
   public static FXMLLoader getFXMLLoader(String name) {
     // FXMLからFXMLLoaderを生成する
     try {
-      return new FXMLLoader(Launcher.class.getResource(name));
+      return new FXMLLoader(Paths.get(name).toUri().toURL());
     } catch (Exception e) {
       Launcher.abort(e);
     }
     return null;
+  }
+
+  public static String toUriString(String path) {
+    return Paths.get(path).toUri().toString();
   }
 }

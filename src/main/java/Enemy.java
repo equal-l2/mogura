@@ -57,7 +57,7 @@ public class Enemy extends Image { // 敵クラス
   }
 
   private Enemy(String fileName, String effect) {
-    super("assets/pic/"+fileName); // 画像読み込み
+    super(Launcher.toUriString("assets/pic/"+fileName)); // 画像読み込み
     final String[] ss = effect.split(":"); // 敵の情報を配列へ
     score = Integer.parseInt(ss[0]);
 

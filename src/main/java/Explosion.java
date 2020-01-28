@@ -1,4 +1,3 @@
-import java.nio.file.Paths;
 import java.util.stream.IntStream;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -17,12 +16,12 @@ public class Explosion extends ImageView { // 爆発表示クラス
 
   static final private Image[] expImages = IntStream // 爆発動画のフレーム
     .rangeClosed(1,56)
-    .mapToObj(i -> String.format("assets/exp/%02d.png",i))
+    .mapToObj(i -> Launcher.toUriString(String.format("assets/exp/%02d.png",i)))
     .map(Image::new)
     .toArray(Image[]::new);
 
   static final private AudioClip expSound = new AudioClip( // 爆発音
-    Paths.get("assets/sounds/exp.wav").toUri().toString()
+    Launcher.toUriString("assets/sounds/exp.wav")
   );
 
   private final Timeline tl = new Timeline(); // 動画のフレーム切り替え用
