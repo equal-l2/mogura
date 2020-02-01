@@ -6,3 +6,5 @@ rankers.dat
 
 # Ignore Gradle build output directory
 build
+
+*.args

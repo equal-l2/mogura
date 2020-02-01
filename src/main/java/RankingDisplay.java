@@ -1,12 +1,10 @@
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-public class RankingDisplay extends VBox { // ランキング表示
-  static public class Element extends HBox {
+public class RankingDisplay extends javafx.scene.layout.VBox { // ランキング表示
+  static public class Element extends javafx.scene.layout.HBox {
     // ランキングの一行
 
     final boolean hasRanker;

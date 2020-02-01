@@ -1,10 +1,8 @@
 import java.io.BufferedReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import javafx.scene.image.Image;
 
-public class Enemy extends Image { // 敵クラス
+public class Enemy extends javafx.scene.image.Image { // 敵クラス
   enum TYPE {
     ENEMY, // 通常敵
     SPECIAL, // スペシャル敵
@@ -18,7 +16,8 @@ public class Enemy extends Image { // 敵クラス
     // 設定ファイルを読み込み
     ArrayList<Enemy> eList = new ArrayList<>();
     try (
-        BufferedReader br = Files.newBufferedReader(Paths.get("assets/enemies.conf"))
+        InputStreamReader isr = new InputStreamReader(Launcher.getResourceStream("enemies.conf"));
+        BufferedReader br = new BufferedReader(isr);
     ) {
       String line;
       while ((line = br.readLine()) != null) {
@@ -57,7 +56,7 @@ public class Enemy extends Image { // 敵クラス
   }
 
   private Enemy(String fileName, String effect) {
-    super(Launcher.toUriString("assets/pic/"+fileName)); // 画像読み込み
+    super(Launcher.getResourceUri("enemies/"+fileName)); // 画像読み込み
     final String[] ss = effect.split(":"); // 敵の情報を配列へ
     score = Integer.parseInt(ss[0]);
 

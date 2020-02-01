@@ -1,10 +1,8 @@
-import java.io.BufferedWriter;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 
 public class Ranking { // ランキング
@@ -92,10 +90,10 @@ public class Ranking { // ランキング
     // (そのまま保存するとスペース周りの扱いが面倒なので)
     Base64.Encoder enc = Base64.getEncoder();
     try (
-        BufferedWriter bw = Files.newBufferedWriter(filePath);
+        java.io.BufferedWriter bw = Files.newBufferedWriter(filePath);
         PrintWriter pw = new PrintWriter(bw)
     ){
-      Arrays.stream(r.toRankerArray())
+      java.util.Arrays.stream(r.toRankerArray())
         .map(e -> String.format("%s %d", enc.encodeToString(e.name.getBytes()), e.score))
         .forEach(pw::println);
     } catch (Exception e) {

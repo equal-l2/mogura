@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -10,11 +9,11 @@ import javafx.scene.text.TextFlow;
 
 public class HowToPlayController {
   @FXML
-  private VBox desc;
+  private javafx.scene.layout.VBox desc;
 
   @FXML
   private void onReturnButtonAction(ActionEvent e) {
-    Launcher.setSceneFromFXML("assets/fxml/Title.fxml");
+    Launcher.setSceneFromFXML("Title.fxml");
   }
 
   @FXML

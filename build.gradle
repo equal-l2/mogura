@@ -19,3 +19,9 @@ javafx {
 application {
     mainClassName = 'Launcher'
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'Launcher'
+    }
+}

@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.LinkedList;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -9,21 +8,13 @@ import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
@@ -31,15 +22,15 @@ public class MainController {
   @FXML
   private Text scoreText; // スコア表示
   @FXML
-  private Pane field; // 敵表示用ペイン（「フィールド」）
+  private javafx.scene.layout.Pane field; // 敵表示用ペイン（「フィールド」）
   @FXML
   private Text timerText; // タイマー表示
   @FXML
-  private ProgressBar spBar; // スペシャルタイムの残り時間を示す
+  private javafx.scene.control.ProgressBar spBar; // スペシャルタイムの残り時間を示す
 
   private static final Duration defaultSpawnRate = Duration.millis(1000); // デフォルトのスポーン間隔
   private static final Duration specialSpawnRate = Duration.millis(500); // スペシャルタイムのスポーン間隔
-  private static final Duration playTime = Duration.seconds(60); // プレイ時間
+  private static final Duration playTime = Duration.seconds(30); // プレイ時間
 
   private boolean stateSpecial = false; // スペシャル状態かを示す
 
@@ -47,7 +38,7 @@ public class MainController {
 
   // スペシャル状態用音楽
   private final MediaPlayer spMusic = new MediaPlayer(new Media(
-    Launcher.toUriString("assets/sounds/special.wav")
+    Launcher.getResourceUri("sounds/special.wav")
   ));
 
   // 過去にスポーンした敵を記録するキュー
@@ -55,10 +46,10 @@ public class MainController {
 
   // 触れてはいけない敵をクリックしたときの音
   private final AudioClip donttouchSound = new AudioClip(
-    Launcher.toUriString("assets/sounds/bubbu.wav")
+    Launcher.getResourceUri("sounds/bubbu.wav")
   );
 
-  private final Image cross = new Image(Launcher.toUriString("assets/cross.png")); // 触れてはいけない敵をクリックした時の画像
+  private final Image cross = new Image(Launcher.getResourceUri("cross.png")); // 触れてはいけない敵をクリックした時の画像
 
   private final Timeline playTimer = new Timeline(); // プレイ時間タイマ
   private final Timeline spTimer = new Timeline(); // spBarの長さを変化させる
@@ -118,7 +109,7 @@ public class MainController {
     spMusic.stop();
 
     // リザルト画面をロード
-    FXMLLoader loader = Launcher.getFXMLLoader("assets/fxml/Result.fxml");
+    javafx.fxml.FXMLLoader loader = Launcher.getFXMLLoader("Result.fxml");
     try {
       Scene s = new Scene(loader.load());
       ResultController c = loader.getController();
@@ -237,13 +228,15 @@ public class MainController {
 
     /* 点数表示の処理 */
     Text t = new Text(Integer.toString(scoreDelta));
-    if (scoreDelta < 0) t.setFill(Color.RED); // 減点のときは赤にする
-    t.setFont(Font.font(40)); // フォントサイズ
+    if (scoreDelta < 0) t.setFill(javafx.scene.paint.Color.RED); // 減点のときは赤にする
+    t.setFont(javafx.scene.text.Font.font(40)); // フォントサイズ
     t.relocate(enemy.getLayoutX(),enemy.getLayoutY()); // 点数の位置を敵に合わせる
 
     PathTransition move = new PathTransition( // 点数は表示後上に移動していく
       Duration.millis(500),
-      new Path(new MoveTo(0.0,0.0), new LineTo(0.0,-50.0)),
+      new javafx.scene.shape.Path(
+          new javafx.scene.shape.MoveTo(0.0,0.0),
+          new javafx.scene.shape.LineTo(0.0,-50.0)),
       t
     );
 
@@ -294,7 +287,7 @@ public class MainController {
       i++;
     } while (
       i < 100 &&
-      Arrays.stream(getEnemyViewsOnField())
+      java.util.Arrays.stream(getEnemyViewsOnField())
       .anyMatch((eOnField) -> eOnField.collideWith(eView))
     );
   }

@@ -9,13 +9,13 @@ public class TitleController {
   @FXML
   private void onStartButtonAction(ActionEvent e) {
     // メイン画面へ移行
-    Launcher.setSceneFromFXML("assets/fxml/Main.fxml");
+    Launcher.setSceneFromFXML("Main.fxml");
   }
 
   @FXML
   private void onHowToPlayButtonAction(ActionEvent e) {
     // 遊び方画面へ移行
-    Launcher.setSceneFromFXML("assets/fxml/HowToPlay.fxml");
+    Launcher.setSceneFromFXML("HowToPlay.fxml");
   }
 
   @FXML

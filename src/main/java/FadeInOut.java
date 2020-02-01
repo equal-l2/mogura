@@ -1,7 +1,6 @@
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
-import javafx.animation.Transition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -34,7 +33,7 @@ public class FadeInOut {
     t.play();
   }
 
-  public Transition toTransition() {
+  public javafx.animation.Transition toTransition() {
     // 中身のTransitionを取り出す
     // どうしても使う必要のある時以外は使ってほしくない
     return t;

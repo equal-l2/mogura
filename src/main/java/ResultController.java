@@ -1,22 +1,20 @@
-import java.util.Optional;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class ResultController {
   @FXML
-  Pane rankingPane;
+  javafx.scene.layout.Pane rankingPane;
 
   private int score; // 今回のプレイのスコア
 
   @FXML
   private void onReturnButtonAction(ActionEvent e) {
     // タイトルに戻る
-    Launcher.setSceneFromFXML("assets/fxml/Title.fxml");
+    Launcher.setSceneFromFXML("Title.fxml");
   }
 
   @FXML
@@ -71,7 +69,7 @@ public class ResultController {
 
     // 名前を受け取り、空白なら"No Name"を
     // さもなくばその名前を返す
-    Optional<String> result = d.showAndWait();
+    java.util.Optional<String> result = d.showAndWait();
     if (result.isPresent()) {
       String s = result.get().trim();
       if(s.equals("")) {
